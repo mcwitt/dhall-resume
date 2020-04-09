@@ -1,0 +1,1 @@
+{ year : Natural, month : Natural }
