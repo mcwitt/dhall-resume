@@ -1,4 +1,4 @@
-{ compiler ? "ghc865" }:
+{ compiler ? "ghc865", withHoogle ? false }:
 
 let
   bootstrap = import <nixpkgs> { };
@@ -13,4 +13,17 @@ let
 
   pkgs = import src { };
 
-in pkgs.haskell.packages."${compiler}".callPackage ./dhall-cv.nix { }
+  haskellPackages = pkgs.haskell.packages."${compiler}";
+
+  hoogleAugmentedPackages = (if withHoogle then
+    haskellPackages.override (old: {
+      overrides = bootstrap.lib.composeExtensions (old.overrides or (_: _: { }))
+        (self: super: {
+          ghc = super.ghc // { withPackages = super.ghc.withHoogle; };
+          ghcWithPackages = self.ghc.withPackages;
+        });
+    })
+  else
+    haskellPackages);
+
+in hoogleAugmentedPackages.callPackage ./dhall-cv.nix { }

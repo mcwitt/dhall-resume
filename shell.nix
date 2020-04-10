@@ -1,1 +1,1 @@
-(import ./release.nix { }).env
+(import ./release.nix { withHoogle = true; }).env
