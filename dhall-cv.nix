@@ -1,5 +1,5 @@
-{ mkDerivation, base, dhall, HaTeX, hspec, raw-strings-qq, stdenv
-, text
+{ mkDerivation, base, dhall, HaTeX, hspec, pandoc, raw-strings-qq
+, stdenv, text
 }:
 mkDerivation {
   pname = "dhall-cv";
@@ -7,7 +7,7 @@ mkDerivation {
   src = ./.;
   isLibrary = true;
   isExecutable = true;
-  libraryHaskellDepends = [ base dhall HaTeX text ];
+  libraryHaskellDepends = [ base dhall HaTeX pandoc text ];
   executableHaskellDepends = [ base ];
   testHaskellDepends = [ base hspec raw-strings-qq text ];
   license = stdenv.lib.licenses.mit;

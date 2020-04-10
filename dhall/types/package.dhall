@@ -1,11 +1,21 @@
 { mkTypes =
       λ(a : Type)
-    → { CV = ./CV.dhall a
+    → { Award = ./Award.dhall a
+      , Basics = ./Basics.dhall
+      , CV = ./CV.dhall a
       , CVDate = ./CVDate.dhall
       , CVSection = ./CVSection.dhall a
-      , ContactInfo = ./ContactInfo.dhall
-      , Experience = ./Experience.dhall a
+      , Interest = ./Interest.dhall a
+      , Job = ./Job.dhall a
+      , Language = ./Language.dhall
+      , Location = ./Location.dhall
+      , Name = ./Name.dhall
+      , Profiles = ./Profiles.dhall
+      , Publication = ./Publication.dhall a
       , SectionContent = ./SectionContent.dhall a
-      , SkillCategory = ./SkillCategory.dhall
+      , Skill = ./Skill.dhall a
+      , Social = ./Social.dhall
+      , Study = ./Study.dhall a
+      , Volunteer = ./Volunteer.dhall a
       }
 }

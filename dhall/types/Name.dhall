@@ -1,1 +1,1 @@
-{ first : Text, last : Text }
+{ firstName : Text, lastName : Text }

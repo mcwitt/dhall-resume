@@ -5,72 +5,208 @@ import           Data.Text
 import           Test.Hspec
 import           Text.RawString.QQ
 
-import           CV                             ( parseCV )
+import           CV                             ( readMarkdownCV )
 import           CV.Types
 
-input :: Text
-input = [r|
+exampleInput :: Text
+exampleInput = [r|
 let types = (./dhall/types/package.dhall).mkTypes Text
 
-in  { name = { first = "first", last = "last" }
-    , headline = Some "headline"
-    , city = "city"
-    , contact =
-        { email = "email"
-        , linkedin = "linkedin"
-        , twitter = Some "twitter"
-        , phone = "111-111-1111"
+in  { basics =
+        { name = { firstName = "", lastName = "" }
+        , email = ""
+        , phone = Some ""
+        , location =
+            types.Location.StreetAddress
+              { address = "", city = "", postalCode = "", country = Some "" }
         }
+    , profiles =
+        { homepage = Some ""
+        , linkedin = Some { user = "", url = Some "" }
+        , github = Some { user = "", url = Some "" }
+        , twitter = Some { user = "", url = Some "" }
+        }
+    , headline = Some ""
     , sections =
-      [ { heading = "Experience"
+      [ { heading = ""
         , content =
-            types.SectionContent.Experiences
-              [ { title = "title"
-                , organization = "organization"
-                , location = "location"
-                , startMonth = { year = 2020, month = 1 }
-                , endMonth = Some { year = 2020, month = 1 }
-                , items = [ "foo", "bar", "baz" ]
+            types.SectionContent.Work
+              [ { position = ""
+                , company = ""
+                , jobStartDate = { year = 1, month = 1 }
+                , jobEndDate = Some { year = 1, month = 1 }
+                , jobLocation = Some ""
+                , companyUrl = Some ""
+                , jobSummary = Some ""
                 }
               ]
         }
-      , { heading = "Skills"
+      , { heading = ""
+        , content =
+            types.SectionContent.Volunteering
+              [ { volunteerPosition = ""
+                , organization = ""
+                , volunteerStartDate = { year = 1, month = 1 }
+                , volunteerEndDate = Some { year = 1, month = 1 }
+                , volunteerLocation = Some ""
+                , organizationUrl = Some ""
+                , volunteerSummary = Some ""
+                }
+              ]
+        }
+      , { heading = ""
         , content =
             types.SectionContent.Skills
-              [ { category = "category", keywords = [ "fizz", "bum" ] } ]
+              [ { skillArea = ""
+                , skillKeywords = [ "" ]
+                , skillSummary = Some ""
+                }
+              ]
+        }
+      , { heading = ""
+        , content =
+            types.SectionContent.Education
+              [ { studyType = ""
+                , area = ""
+                , institution = ""
+                , studyStartDate = { year = 1, month = 1 }
+                , studyEndDate = Some { year = 1, month = 1 }
+                , studyLocation = Some ""
+                , institutionUrl = Some ""
+                , gpa = Some ""
+                , courses = [ "" ]
+                , studySummary = Some ""
+                }
+              ]
+        }
+      , { heading = ""
+        , content =
+            types.SectionContent.Awards
+              [ { awardTitle = ""
+                , awardDate = { year = 1, month = 1 }
+                , awarder = ""
+                , awardSummary = Some ""
+                }
+              ]
+        }
+      , { heading = ""
+        , content =
+            types.SectionContent.Publications
+              [ { publicationTitle = ""
+                , publisher = ""
+                , publicationDate = { year = 1, month = 1 }
+                , publicationUrl = Some ""
+                , publicationSummary = Some ""
+                }
+              ]
+        }
+      , { heading = ""
+        , content =
+            types.SectionContent.Interests
+              [ { interest = "", keywords = [ "" ] } ]
+        }
+      , { heading = ""
+        , content =
+            types.SectionContent.Languages [ { language = "", fluency = "" } ]
         }
       ]
     }
 |]
 
-parsed :: CV Text
-parsed = CV
-  { name     = Name "first" "last"
-  , headline = Just "headline"
-  , city     = "city"
-  , contact  = ContactInfo { email    = "email"
-                           , linkedin = "linkedin"
-                           , twitter  = Just "twitter"
-                           , phone    = "111-111-1111"
-                           }
+exampleCV :: CV Markdown
+exampleCV = Markdown <$> CV
+  { basics   = Basics
+                 { name     = Name "" ""
+                 , email    = ""
+                 , phone    = Just ""
+                 , location = StreetAddress { city       = ""
+                                            , address    = ""
+                                            , postalCode = ""
+                                            , country    = Just ""
+                                            }
+                 }
+  , profiles = Profiles { homepage = Just ""
+                        , linkedin = Just $ Social "" $ Just ""
+                        , github   = Just $ Social "" $ Just ""
+                        , twitter  = Just $ Social "" $ Just ""
+                        }
+  , headline = Just ""
   , sections =
     [ CVSection
-      { heading = "Experience"
-      , content = Experiences
-                    [ Experience { title        = "title"
-                                 , organization = "organization"
-                                 , location     = "location"
-                                 , startMonth   = CVDate 2020 1
-                                 , endMonth     = Just $ CVDate 2020 1
-                                 , items        = ["foo", "bar", "baz"]
-                                 }
+      { heading = ""
+      , content = Work
+                    [ Job { position     = ""
+                          , company      = ""
+                          , jobStartDate = CVDate 1 1
+                          , jobEndDate   = Just $ CVDate 1 1
+                          , jobLocation  = Just ""
+                          , companyUrl   = Just ""
+                          , jobSummary   = Just ""
+                          }
                     ]
       }
     , CVSection
-      { heading = "Skills"
-      , content = Skills
-        [SkillCategory { category = "category", keywords = ["fizz", "bum"] }]
+      { heading = ""
+      , content = Volunteering
+                    [ Volunteer { volunteerPosition  = ""
+                                , organization       = ""
+                                , volunteerStartDate = CVDate 1 1
+                                , volunteerEndDate   = Just $ CVDate 1 1
+                                , volunteerLocation  = Just ""
+                                , organizationUrl    = Just ""
+                                , volunteerSummary   = Just ""
+                                }
+                    ]
       }
+    , CVSection
+      { heading = ""
+      , content = Skills
+        [Skill { skillArea = "", skillKeywords = [""], skillSummary = Just "" }]
+      }
+    , CVSection
+      { heading = ""
+      , content = Education
+                    [ Study { studyType      = ""
+                            , area           = ""
+                            , institution    = ""
+                            , studyStartDate = CVDate 1 1
+                            , studyEndDate   = Just $ CVDate 1 1
+                            , studyLocation  = Just ""
+                            , institutionUrl = Just ""
+                            , gpa            = Just ""
+                            , courses        = [""]
+                            , studySummary   = Just ""
+                            }
+                    ]
+      }
+    , CVSection
+      { heading = ""
+      , content = Awards
+                    [ Award { awardTitle   = ""
+                            , awardDate    = CVDate 1 1
+                            , awarder      = ""
+                            , awardSummary = Just ""
+                            }
+                    ]
+      }
+    , CVSection
+      { heading = ""
+      , content = Publications
+                    [ Publication { publicationTitle   = ""
+                                  , publisher          = ""
+                                  , publicationDate    = CVDate 1 1
+                                  , publicationUrl     = Just ""
+                                  , publicationSummary = Just ""
+                                  }
+                    ]
+      }
+    , CVSection
+      { heading = ""
+      , content = Interests [Interest { interest = "", keywords = [""] }]
+      }
+    , CVSection { heading = ""
+                , content = Languages [Language { language = "", fluency = "" }]
+                }
     ]
   }
 
@@ -78,5 +214,5 @@ main :: IO ()
 main = hspec $ do
   describe "Frontend" $ do
     it "should parse simple example" $ do
-      parseCV input `shouldReturn` parsed
+      readMarkdownCV exampleInput `shouldReturn` exampleCV
 
