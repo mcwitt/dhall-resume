@@ -2,7 +2,7 @@
 , stdenv, text
 }:
 mkDerivation {
-  pname = "dhall-cv";
+  pname = "dhall-resume";
   version = "0.1.0.0";
   src = ./.;
   isLibrary = true;

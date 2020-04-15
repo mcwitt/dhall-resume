@@ -1,6 +1,6 @@
   λ(a : Type)
 → { awardTitle : Text
-  , awardDate : ./CVDate.dhall
+  , awardDate : ./Date.dhall
   , awarder : Text
   , awardSummary : Optional a
   }

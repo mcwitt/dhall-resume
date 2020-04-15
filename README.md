@@ -1,6 +1,6 @@
-# dhall-cv
+# dhall-resume
 
-Project to generate CVs in a variety of formats from a common
+Project to generate résumés in a variety of formats from a common
 description in the [Dhall][dhall] configuration language.
 
 Inspired by [mstksg/cv-static][cv-static].

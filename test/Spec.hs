@@ -5,8 +5,8 @@ import           Data.Text
 import           Test.Hspec
 import           Text.RawString.QQ
 
-import           CV                             ( readMarkdownCV )
-import           CV.Types
+import           Resume                         ( readMarkdownResume )
+import           Resume.Types
 
 exampleInput :: Text
 exampleInput = [r|
@@ -113,8 +113,8 @@ in  { basics =
     }
 |]
 
-exampleCV :: CV Markdown
-exampleCV = Markdown <$> CV
+exampleResume :: Resume Markdown
+exampleResume = Markdown <$> Resume
   { basics   = Basics
                  { name     = Name "" ""
                  , email    = ""
@@ -132,45 +132,45 @@ exampleCV = Markdown <$> CV
                         }
   , headline = Just ""
   , sections =
-    [ CVSection
+    [ Section
       { heading = ""
       , content = Work
                     [ Job { position     = ""
                           , company      = ""
-                          , jobStartDate = CVDate 1 1
-                          , jobEndDate   = Just $ CVDate 1 1
+                          , jobStartDate = Date 1 1
+                          , jobEndDate   = Just $ Date 1 1
                           , jobLocation  = Just ""
                           , companyUrl   = Just ""
                           , jobSummary   = Just ""
                           }
                     ]
       }
-    , CVSection
+    , Section
       { heading = ""
       , content = Volunteering
                     [ Volunteer { volunteerPosition  = ""
                                 , organization       = ""
-                                , volunteerStartDate = CVDate 1 1
-                                , volunteerEndDate   = Just $ CVDate 1 1
+                                , volunteerStartDate = Date 1 1
+                                , volunteerEndDate   = Just $ Date 1 1
                                 , volunteerLocation  = Just ""
                                 , organizationUrl    = Just ""
                                 , volunteerSummary   = Just ""
                                 }
                     ]
       }
-    , CVSection
+    , Section
       { heading = ""
       , content = Skills
         [Skill { skillArea = "", skillKeywords = [""], skillSummary = Just "" }]
       }
-    , CVSection
+    , Section
       { heading = ""
       , content = Education
                     [ Study { studyType      = ""
                             , area           = ""
                             , institution    = ""
-                            , studyStartDate = CVDate 1 1
-                            , studyEndDate   = Just $ CVDate 1 1
+                            , studyStartDate = Date 1 1
+                            , studyEndDate   = Just $ Date 1 1
                             , studyLocation  = Just ""
                             , institutionUrl = Just ""
                             , gpa            = Just ""
@@ -179,32 +179,32 @@ exampleCV = Markdown <$> CV
                             }
                     ]
       }
-    , CVSection
+    , Section
       { heading = ""
       , content = Awards
                     [ Award { awardTitle   = ""
-                            , awardDate    = CVDate 1 1
+                            , awardDate    = Date 1 1
                             , awarder      = ""
                             , awardSummary = Just ""
                             }
                     ]
       }
-    , CVSection
+    , Section
       { heading = ""
       , content = Publications
                     [ Publication { publicationTitle   = ""
                                   , publisher          = ""
-                                  , publicationDate    = CVDate 1 1
+                                  , publicationDate    = Date 1 1
                                   , publicationUrl     = Just ""
                                   , publicationSummary = Just ""
                                   }
                     ]
       }
-    , CVSection
+    , Section
       { heading = ""
       , content = Interests [Interest { interest = "", keywords = [""] }]
       }
-    , CVSection { heading = ""
+    , Section { heading = ""
                 , content = Languages [Language { language = "", fluency = "" }]
                 }
     ]
@@ -214,5 +214,5 @@ main :: IO ()
 main = hspec $ do
   describe "Frontend" $ do
     it "should parse simple example" $ do
-      readMarkdownCV exampleInput `shouldReturn` exampleCV
+      readMarkdownResume exampleInput `shouldReturn` exampleResume
 

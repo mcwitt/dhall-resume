@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module CV.Backend.LaTeX
+module Resume.Backend.LaTeX
   ( compileLaTeX
   )
 where
@@ -15,16 +15,16 @@ import           Text.LaTeX.Base.Syntax
 import           Text.LaTeX.Packages.AMSMath
 import           Text.Pandoc
 
-import           CV.Types
+import           Resume.Types
 
--- | Render CV with Markdown-formatted text as LaTeX
-compileLaTeX :: CV Markdown -> Either PandocError Text
-compileLaTeX cv = render . toLaTeX <$> traverse fromMarkdown cv
+-- | Render Resume with Markdown-formatted text as LaTeX
+compileLaTeX :: Resume Markdown -> Either PandocError Text
+compileLaTeX r = render . toLaTeX <$> traverse fromMarkdown r
  where
   fromMarkdown = runPure . (readMarkdown def >=> writeLaTeX def) . unMarkdown
 
-toLaTeX :: CV Text -> LaTeX
-toLaTeX CV {..} =
+toLaTeX :: Resume Text -> LaTeX
+toLaTeX Resume {..} =
   documentclass [FontSize (Pt 11), Paper A4] "moderncv"
     <> pandocHeader
     <> usepackage [TeXRaw "scale=0.8"] "geometry"
@@ -68,8 +68,8 @@ mkSocial :: Text -> Social -> LaTeX
 mkSocial service Social {..} =
   TeXComm "social" [OptArg $ TeXRaw service, FixArg $ TeXRaw user]
 
-mkSection :: CVSection Text -> LaTeX
-mkSection CVSection {..} = section (TeXRaw heading) <> case content of
+mkSection :: Section Text -> LaTeX
+mkSection Section {..} = section (TeXRaw heading) <> case content of
   Paragraph    t  -> TeXRaw t
   Work         xs -> mconcat $ fmap mkJob xs
   Volunteering xs -> mconcat $ fmap mkVolunteer xs
@@ -110,12 +110,12 @@ mkStudy Study {..} = TeXComm "cventry" $ fixArgs
   , fromMaybe "" studySummary
   ]
 
-mkDateRange :: CVDate -> Maybe CVDate -> Text
+mkDateRange :: Date -> Maybe Date -> Text
 mkDateRange startDate =
   maybe (mkDate startDate) (\m -> mkDate startDate <> "--" <> mkDate m)
 
-mkDate :: CVDate -> Text
-mkDate CVDate {..} = fromString $ show month ++ "/" ++ show year
+mkDate :: Date -> Text
+mkDate Date {..} = fromString $ show month ++ "/" ++ show year
 
 mkSkill :: Skill Text -> LaTeX
 mkSkill Skill {..} = TeXComm "cvitem" $ fmap

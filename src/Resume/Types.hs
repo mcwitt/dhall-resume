@@ -11,7 +11,7 @@ generating Haskell type definitions from the Dhall definitions
 (e.g. using 'Dhall.TH').
 -}
 
-module CV.Types where
+module Resume.Types where
 
 import           Data.Text
 import           Dhall
@@ -48,7 +48,7 @@ data Profiles = Profiles
   , twitter  :: Maybe Social
  } deriving (Generic, FromDhall, Eq, Show)
 
-data CVDate = CVDate
+data Date = Date
   { year  :: Natural
   , month :: Natural
   } deriving (Generic, FromDhall, Eq, Show)
@@ -64,18 +64,18 @@ data Social = Social
   } deriving (Generic, FromDhall, Eq, Show)
 
 -- The type parameter 'a' in the types below refers to underlying text
--- representation. The input type is always 'CV Text'.  This might be
+-- representation. The input type is always 'Resume Text'.  This might be
 -- converted to a different representation before rendering depending
 -- on the desired output format.
 
-data CV a = CV
+data Resume a = Resume
   { basics   :: Basics
   , profiles :: Profiles
   , headline :: Maybe a
-  , sections :: [CVSection a]
+  , sections :: [Section a]
   } deriving (Functor, Foldable, Traversable, Generic, Eq, Show)
 
-data CVSection a = CVSection
+data Section a = Section
   { heading :: Text
   , content :: SectionContent a
   } deriving (Functor, Foldable, Traversable, Generic, Eq, Show)
@@ -95,8 +95,8 @@ data SectionContent a
 data Job a = Job
   { position      :: Text
   , company       :: Text
-  , jobStartDate  :: CVDate
-  , jobEndDate    :: Maybe CVDate
+  , jobStartDate  :: Date
+  , jobEndDate    :: Maybe Date
   , jobLocation   :: Maybe Text
   , companyUrl    :: Maybe Text
   , jobSummary    :: Maybe a
@@ -105,8 +105,8 @@ data Job a = Job
 data Volunteer a = Volunteer
   { volunteerPosition   :: Text
   , organization        :: Text
-  , volunteerStartDate  :: CVDate
-  , volunteerEndDate    :: Maybe CVDate
+  , volunteerStartDate  :: Date
+  , volunteerEndDate    :: Maybe Date
   , volunteerLocation   :: Maybe Text
   , organizationUrl     :: Maybe Text
   , volunteerSummary    :: Maybe a
@@ -116,8 +116,8 @@ data Study a = Study
   { studyType      :: Text
   , area           :: Text
   , institution    :: Text
-  , studyStartDate :: CVDate
-  , studyEndDate   :: Maybe CVDate
+  , studyStartDate :: Date
+  , studyEndDate   :: Maybe Date
   , studyLocation  :: Maybe Text
   , institutionUrl :: Maybe Text
   , gpa            :: Maybe Text
@@ -133,7 +133,7 @@ data Skill a = Skill
 
 data Award a = Award
   { awardTitle   :: Text
-  , awardDate    :: CVDate
+  , awardDate    :: Date
   , awarder      :: Text
   , awardSummary :: Maybe a
   } deriving (Functor, Foldable, Traversable, Generic, Eq, Show)
@@ -141,7 +141,7 @@ data Award a = Award
 data Publication a = Publication
   { publicationTitle   :: Text
   , publisher          :: Text
-  , publicationDate    :: CVDate
+  , publicationDate    :: Date
   , publicationUrl     :: Maybe Text
   , publicationSummary :: Maybe a
   } deriving (Functor, Foldable, Traversable, Generic, Eq, Show)
@@ -153,8 +153,8 @@ data Interest a = Interest
 
 
 instance FromDhall a => FromDhall (Award a)
-instance FromDhall a => FromDhall (CV a)
-instance FromDhall a => FromDhall (CVSection a)
+instance FromDhall a => FromDhall (Resume a)
+instance FromDhall a => FromDhall (Section a)
 instance FromDhall a => FromDhall (Interest a)
 instance FromDhall a => FromDhall (Job a)
 instance FromDhall a => FromDhall (Publication a)

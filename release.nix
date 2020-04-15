@@ -26,4 +26,4 @@ let
   else
     haskellPackages);
 
-in hoogleAugmentedPackages.callPackage ./dhall-cv.nix { }
+in hoogleAugmentedPackages.callPackage ./dhall-resume.nix { }

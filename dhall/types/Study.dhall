@@ -2,8 +2,8 @@
 → { studyType : Text
   , area : Text
   , institution : Text
-  , studyStartDate : ./CVDate.dhall
-  , studyEndDate : Optional ./CVDate.dhall
+  , studyStartDate : ./Date.dhall
+  , studyEndDate : Optional ./Date.dhall
   , studyLocation : Optional Text
   , institutionUrl : Optional Text
   , gpa : Optional Text

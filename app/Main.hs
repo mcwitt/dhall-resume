@@ -6,7 +6,7 @@ module Main where
 import qualified Data.Text.IO                  as TIO
 import           Options.Applicative
 
-import           CV                             ( compile )
+import           Resume                         ( compile )
 
 data Args = Args { inputPath :: FilePath, outputPath :: FilePath }
 
@@ -23,8 +23,9 @@ args =
 main :: IO ()
 main = run =<< execParser opts
  where
-  opts = info (args <**> helper)
-              (fullDesc <> progDesc "Compile CV from Dhall configuration")
+  opts = info
+    (args <**> helper)
+    (fullDesc <> progDesc "Compile resume from Dhall configuration")
 
 run :: Args -> IO ()
 run Args {..} = TIO.readFile inputPath >>= compile >>= TIO.writeFile outputPath

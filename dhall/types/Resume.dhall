@@ -2,5 +2,5 @@
 → { basics : ./Basics.dhall
   , profiles : ./Profiles.dhall
   , headline : Optional a
-  , sections : List (./CVSection.dhall a)
+  , sections : List (./Section.dhall a)
   }

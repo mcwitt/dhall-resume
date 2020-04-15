@@ -2,9 +2,9 @@
       λ(a : Type)
     → { Award = ./Award.dhall a
       , Basics = ./Basics.dhall
-      , CV = ./CV.dhall a
-      , CVDate = ./CVDate.dhall
-      , CVSection = ./CVSection.dhall a
+      , Resume = ./Resume.dhall a
+      , Date = ./Date.dhall
+      , Section = ./Section.dhall a
       , Interest = ./Interest.dhall a
       , Job = ./Job.dhall a
       , Language = ./Language.dhall
