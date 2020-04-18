@@ -7,12 +7,10 @@ module Resume.Backend.LaTeX
 where
 
 import           Control.Monad                  ( (>=>) )
-import           Data.List                      ( intersperse )
 import           Data.Maybe
 import qualified Data.Text                     as T
 import           Text.LaTeX
 import           Text.LaTeX.Base.Syntax
-import           Text.LaTeX.Packages.AMSMath
 import           Text.Pandoc
 
 import           Resume.Types
@@ -118,7 +116,8 @@ mkDate :: Date -> Text
 mkDate Date {..} = fromString $ show month ++ "/" ++ show year
 
 mkSkill :: Skill Text -> LaTeX
-mkSkill Skill {..} = TeXComm "cvitem" $ fmap
-  FixArg
-  [TeXRaw skillArea, mconcat . intersperse sep $ fmap TeXRaw skillKeywords]
-  where sep = math $ medspace `cdot` medspace
+mkSkill Skill {..} = case skillSummary of
+  Just summary -> TeXComm "cvitem" $ fixArgs [skillArea, summary]
+  Nothing ->
+    error
+      "Rendering skill keyword lists is not yet implemented. Please use 'skillSummary' instead."
