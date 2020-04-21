@@ -21,15 +21,18 @@ library
       Resume
     , Resume.Types
     , Resume.Backend.LaTeX
+    , Resume.Backend.Html
   build-depends:
       HaTeX                       >= 3.22.2 && < 3.23
     , base                        >= 4.12.0 && < 4.13
+    , blaze-html                  >= 0.9.1 && < 0.10
+    , data-default                >= 0.7.1 && < 0.8
     , dhall                       >= 1.30.0 && < 1.31
     , pandoc                      >= 2.9.1 && < 2.10
     , text                        >= 1.2.3 && < 1.3
   hs-source-dirs: src
   default-language: Haskell2010
-  ghc-options: -Wall -Wincomplete-record-updates
+  ghc-options: -Wall -Wincomplete-record-updates -fno-warn-orphans
 
 test-suite dhall-resume-test
   type: exitcode-stdio-1.0

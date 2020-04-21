@@ -8,15 +8,21 @@ import           GHC.IO.Encoding
 import           Options.Applicative
 import           System.IO
 
-import           Resume                         ( compile )
+import           Resume                         ( Backend(..)
+                                                , compile
+                                                )
 
-data Args = Args { inputPath :: FilePath, outputPath :: FilePath }
+data Args = Args { inputPath :: FilePath, _backend :: Backend, outputPath :: FilePath }
+
+backend :: Parser Backend
+backend = flag' LaTeX (long "latex") <|> flag' Html (long "html")
 
 args :: Parser Args
 args =
   Args
     <$> strOption
           (long "file" <> short 'f' <> metavar "FILENAME" <> help "Input file")
+    <*> backend
     <*> strOption
           (long "output" <> short 'o' <> metavar "FILENAME" <> help
             "Output file"
@@ -32,4 +38,5 @@ main = do
     (fullDesc <> progDesc "Compile resume from Dhall configuration")
 
 run :: Args -> IO ()
-run Args {..} = TIO.readFile inputPath >>= compile >>= TIO.writeFile outputPath
+run Args {..} =
+  TIO.readFile inputPath >>= compile _backend >>= TIO.writeFile outputPath
