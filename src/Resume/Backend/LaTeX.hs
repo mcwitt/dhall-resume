@@ -101,7 +101,7 @@ mkVolunteer Volunteer {..} = TeXComm "cventry" $ fixArgs
 mkStudy :: Study Text -> LaTeX
 mkStudy Study {..} = TeXComm "cventry" $ fixArgs
   [ mkDateRange studyStartDate studyEndDate
-  , studyType
+  , studyType <> ", " <> area
   , institution
   , fromMaybe "" studyLocation
   , fromMaybe "" gpa
