@@ -4,7 +4,9 @@
 module Main where
 
 import qualified Data.Text.IO                  as TIO
+import           GHC.IO.Encoding
 import           Options.Applicative
+import           System.IO
 
 import           Resume                         ( compile )
 
@@ -21,7 +23,9 @@ args =
           )
 
 main :: IO ()
-main = run =<< execParser opts
+main = do
+  GHC.IO.Encoding.setLocaleEncoding System.IO.utf8
+  run =<< execParser opts
  where
   opts = info
     (args <**> helper)
