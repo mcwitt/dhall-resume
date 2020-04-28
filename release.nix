@@ -26,4 +26,10 @@ let
   else
     haskellPackages);
 
-in hoogleAugmentedPackages.callPackage ./dhall-resume.nix { }
+in (hoogleAugmentedPackages.callPackage ./dhall-resume.nix { }).overrideAttrs
+(_: {
+  postInstall = ''
+    mkdir -p $out/share/dhall-resume
+    cp -r $src/dhall/types $out/share/dhall-resume
+  '';
+})
