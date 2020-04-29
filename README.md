@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/mcwitt/dhall-resume.svg?branch=master)](https://travis-ci.com/mcwitt/dhall-resume)
+
 # dhall-resume
 
 Project to generate résumés in a variety of formats from a common
