@@ -1,15 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-import           Data.Text
-import           Test.Hspec
-import           Text.RawString.QQ
-
-import           Resume                         ( readMarkdownResume )
-import           Resume.Types
+import Data.Text
+import Resume (readMarkdownResume)
+import Resume.Types
+import Test.Hspec
+import Text.RawString.QQ
 
 exampleInput :: Text
-exampleInput = [r|
+exampleInput =
+  [r|
 let types = (./dhall/types/package.dhall).mkTypes Text
 
 in  { basics =
@@ -114,105 +114,123 @@ in  { basics =
 |]
 
 exampleResume :: Resume Markdown
-exampleResume = Markdown <$> Resume
-  { basics   = Basics
-                 { name     = Name "" ""
-                 , email    = ""
-                 , phone    = Just ""
-                 , location = StreetAddress { city       = ""
-                                            , address    = ""
-                                            , postalCode = ""
-                                            , country    = Just ""
-                                            }
-                 }
-  , profiles = Profiles { homepage = Just ""
-                        , linkedin = Just $ Social "" $ Just ""
-                        , github   = Just $ Social "" $ Just ""
-                        , twitter  = Just $ Social "" $ Just ""
+exampleResume =
+  Markdown
+    <$> Resume
+      { basics =
+          Basics
+            { name = Name "" "",
+              email = "",
+              phone = Just "",
+              location =
+                StreetAddress
+                  { city = "",
+                    address = "",
+                    postalCode = "",
+                    country = Just ""
+                  }
+            },
+        profiles =
+          Profiles
+            { homepage = Just "",
+              linkedin = Just $ Social "" $ Just "",
+              github = Just $ Social "" $ Just "",
+              twitter = Just $ Social "" $ Just ""
+            },
+        headline = Just "",
+        sections =
+          [ Section
+              { heading = "",
+                content =
+                  Work
+                    [ Job
+                        { position = "",
+                          company = "",
+                          jobStartDate = Date 1 1,
+                          jobEndDate = Just $ Date 1 1,
+                          jobLocation = Just "",
+                          companyUrl = Just "",
+                          jobSummary = Just ""
                         }
-  , headline = Just ""
-  , sections =
-    [ Section
-      { heading = ""
-      , content = Work
-                    [ Job { position     = ""
-                          , company      = ""
-                          , jobStartDate = Date 1 1
-                          , jobEndDate   = Just $ Date 1 1
-                          , jobLocation  = Just ""
-                          , companyUrl   = Just ""
-                          , jobSummary   = Just ""
-                          }
                     ]
-      }
-    , Section
-      { heading = ""
-      , content = Volunteering
-                    [ Volunteer { volunteerPosition  = ""
-                                , organization       = ""
-                                , volunteerStartDate = Date 1 1
-                                , volunteerEndDate   = Just $ Date 1 1
-                                , volunteerLocation  = Just ""
-                                , organizationUrl    = Just ""
-                                , volunteerSummary   = Just ""
-                                }
+              },
+            Section
+              { heading = "",
+                content =
+                  Volunteering
+                    [ Volunteer
+                        { volunteerPosition = "",
+                          organization = "",
+                          volunteerStartDate = Date 1 1,
+                          volunteerEndDate = Just $ Date 1 1,
+                          volunteerLocation = Just "",
+                          organizationUrl = Just "",
+                          volunteerSummary = Just ""
+                        }
                     ]
-      }
-    , Section
-      { heading = ""
-      , content = Skills
-        [Skill { skillArea = "", skillKeywords = [""], skillSummary = Just "" }]
-      }
-    , Section
-      { heading = ""
-      , content = Education
-                    [ Study { studyType      = ""
-                            , area           = ""
-                            , institution    = ""
-                            , studyStartDate = Date 1 1
-                            , studyEndDate   = Just $ Date 1 1
-                            , studyLocation  = Just ""
-                            , institutionUrl = Just ""
-                            , gpa            = Just ""
-                            , courses        = [""]
-                            , studySummary   = Just ""
-                            }
+              },
+            Section
+              { heading = "",
+                content =
+                  Skills
+                    [Skill {skillArea = "", skillKeywords = [""], skillSummary = Just ""}]
+              },
+            Section
+              { heading = "",
+                content =
+                  Education
+                    [ Study
+                        { studyType = "",
+                          area = "",
+                          institution = "",
+                          studyStartDate = Date 1 1,
+                          studyEndDate = Just $ Date 1 1,
+                          studyLocation = Just "",
+                          institutionUrl = Just "",
+                          gpa = Just "",
+                          courses = [""],
+                          studySummary = Just ""
+                        }
                     ]
-      }
-    , Section
-      { heading = ""
-      , content = Awards
-                    [ Award { awardTitle   = ""
-                            , awardDate    = Date 1 1
-                            , awarder      = ""
-                            , awardSummary = Just ""
-                            }
+              },
+            Section
+              { heading = "",
+                content =
+                  Awards
+                    [ Award
+                        { awardTitle = "",
+                          awardDate = Date 1 1,
+                          awarder = "",
+                          awardSummary = Just ""
+                        }
                     ]
-      }
-    , Section
-      { heading = ""
-      , content = Publications
-                    [ Publication { publicationTitle   = ""
-                                  , publisher          = ""
-                                  , publicationDate    = Date 1 1
-                                  , publicationUrl     = Just ""
-                                  , publicationSummary = Just ""
-                                  }
+              },
+            Section
+              { heading = "",
+                content =
+                  Publications
+                    [ Publication
+                        { publicationTitle = "",
+                          publisher = "",
+                          publicationDate = Date 1 1,
+                          publicationUrl = Just "",
+                          publicationSummary = Just ""
+                        }
                     ]
+              },
+            Section
+              { heading = "",
+                content = Interests [Interest {interest = "", keywords = [""]}]
+              },
+            Section
+              { heading = "",
+                content = Languages [Language {language = "", fluency = ""}]
+              }
+          ]
       }
-    , Section
-      { heading = ""
-      , content = Interests [Interest { interest = "", keywords = [""] }]
-      }
-    , Section { heading = ""
-                , content = Languages [Language { language = "", fluency = "" }]
-                }
-    ]
-  }
 
 main :: IO ()
 main = hspec $ do
   describe "Frontend" $ do
     it "should parse simple example" $ do
       readMarkdownResume exampleInput `shouldReturn` exampleResume
-
