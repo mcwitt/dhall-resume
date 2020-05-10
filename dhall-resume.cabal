@@ -16,6 +16,7 @@ library
   hs-source-dirs:   src
   build-depends:    base         >= 4.12.0 && < 4.13
                   , HaTeX        >= 3.22.2 && < 3.23
+                  , clay         >= 0.13.3 && < 0.14
                   , data-default >= 0.7.1 && < 0.8
                   , dhall        >= 1.30.0 && < 1.31
                   , lucid        >= 2.9.12 && < 2.10

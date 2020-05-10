@@ -1,5 +1,5 @@
-{ mkDerivation, base, data-default, dhall, HaTeX, hspec, lucid
-, optparse-applicative, pandoc, raw-strings-qq, stdenv, text
+{ mkDerivation, base, clay, data-default, dhall, HaTeX, hspec
+, lucid, optparse-applicative, pandoc, raw-strings-qq, stdenv, text
 }:
 mkDerivation {
   pname = "dhall-resume";
@@ -8,7 +8,7 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    base data-default dhall HaTeX lucid pandoc text
+    base clay data-default dhall HaTeX lucid pandoc text
   ];
   executableHaskellDepends = [ base optparse-applicative text ];
   testHaskellDepends = [ base hspec raw-strings-qq text ];
