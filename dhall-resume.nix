@@ -1,4 +1,4 @@
-{ mkDerivation, base, blaze-html, dhall, HaTeX, hspec
+{ mkDerivation, base, data-default, dhall, HaTeX, hspec, lucid
 , optparse-applicative, pandoc, raw-strings-qq, stdenv, text
 }:
 mkDerivation {
@@ -8,7 +8,7 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    base blaze-html dhall HaTeX pandoc text
+    base data-default dhall HaTeX lucid pandoc text
   ];
   executableHaskellDepends = [ base optparse-applicative text ];
   testHaskellDepends = [ base hspec raw-strings-qq text ];

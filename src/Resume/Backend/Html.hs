@@ -13,10 +13,8 @@ import Data.Default
 import Data.Maybe
 import Data.Text
 import qualified Data.Text.Lazy as TL
+import Lucid
 import Resume.Types as R
-import Text.Blaze.Html.Renderer.Text
-import Text.Blaze.Html5 as H
-import Text.Blaze.Html5.Attributes as A
 import Text.Pandoc (PandocError)
 import qualified Text.Pandoc as P
 
@@ -37,62 +35,47 @@ instance Default HtmlBackendOptions where
 
 compileHtml :: HtmlBackendOptions -> Resume Markdown -> Either PandocError Text
 compileHtml opts r =
-  TL.toStrict . renderHtml . mkResume opts <$> traverse fromMarkdown r
+  TL.toStrict . renderText . mkResume opts <$> traverse fromMarkdown r
   where
     fromMarkdown =
-      P.runPure . (P.readMarkdown def >=> P.writeHtml5 def) . unMarkdown
+      P.runPure . (P.readMarkdown def >=> P.writeHtml5String def) . unMarkdown
 
-mkResume :: HtmlBackendOptions -> Resume Html -> Html
+mkResume :: HtmlBackendOptions -> Resume Text -> Html ()
 mkResume opts Resume {..} =
-  docTypeHtml $
-    H.head
-      ( (meta ! charset "utf-8")
-          <> H.title
-            ( toHtml
-                (let r = R.name basics in firstName r <> " " <> lastName r)
-            )
-          <> mconcat
-            ( fmap
-                ( \path ->
-                    link ! rel "stylesheet" ! A.type_ "text/css"
-                      ! href
-                        (textValue path)
-                )
-                (cssPaths opts)
-            )
-      )
-      <> body
-        ( h1
-            ( let r = R.name basics
-               in toHtml $ firstName r <> " " <> lastName r
-            )
-            <> ( H.div
-                   ! class_ "contact-info"
-                   $ mkContactItem
-                     (email basics)
-                     (Just $ "mailto:" <> email basics)
-                     (Just "fa fa-envelope")
-                     <> maybe
-                       mempty
-                       (\t -> mkContactItem t (Just t) (Just "fa fa-globe"))
-                       (homepage profiles)
-                     <> maybe
-                       mempty
-                       (mkSocialItem "//www.linkedin.com/in" "fa fa-linkedin")
-                       (linkedin profiles)
-                     <> maybe
-                       mempty
-                       (mkSocialItem "//www.twitter.com/" "fa fa-twitter")
-                       (twitter profiles)
-                     <> maybe
-                       mempty
-                       (mkSocialItem "//www.github.com/" "fa fa-github")
-                       (github profiles)
-               )
-            <> mconcat (fmap toHtml sections)
+  html_ [lang_ "en"] $ do
+    head_ $ do
+      meta_ [httpEquiv_ "Content-Type", content_ "text/html; charset=utf-8"]
+      title_ (toHtml (let r = R.name basics in firstName r <> " " <> lastName r))
+      mconcat $
+        ( \path ->
+            link_ [rel_ "stylesheet", type_ "text/css", href_ path]
         )
+          <$> cssPaths opts
+    body_ $ do
+      h1_
+        ( let r = R.name basics
+           in toHtml $ firstName r <> " " <> lastName r
+        )
+      div_ [class_ "contact-info"] $ do
+        mkContactItem
+          (email basics)
+          (Just $ "mailto:" <> email basics)
+          (Just "fa fa-envelope")
+        foldMap
+          (\t -> mkContactItem t (Just t) (Just "fa fa-globe"))
+          (homepage profiles)
+        foldMap
+          (mkSocialItem "//www.linkedin.com/in" "fa fa-linkedin")
+          (linkedin profiles)
+        foldMap
+          (mkSocialItem "//www.twitter.com/" "fa fa-twitter")
+          (twitter profiles)
+        foldMap
+          (mkSocialItem "//www.github.com/" "fa fa-github")
+          (github profiles)
+        mconcat (fmap mkSection sections)
 
-mkSocialItem :: Text -> Text -> Social -> Html
+mkSocialItem :: Text -> Text -> Social -> Html ()
 mkSocialItem baseUrl iconClass Social {..} =
   mkContactItem
     user
@@ -101,90 +84,79 @@ mkSocialItem baseUrl iconClass Social {..} =
   where
     url_ = fromMaybe (baseUrl <> user) url
 
-mkContactItem :: Text -> Maybe Text -> Maybe Text -> Html
+mkContactItem :: Text -> Maybe Text -> Maybe Text -> Html ()
 mkContactItem t url iconClass =
-  li $
-    maybe mempty (\ic -> i ! class_ (textValue ic) $ mempty) iconClass
-      <> (a ! maybe mempty (href . textValue) url $ toHtml t)
+  li_ $ do
+    foldMap (\ic -> i_ [class_ ic] mempty) iconClass
+    a_ (catMaybes [fmap href_ url]) $ toHtml t
 
-entries :: Html -> Html
-entries = H.div ! class_ "resume-entries"
+entries :: Html () -> Html ()
+entries = div_ [class_ "resume-entries"]
 
-mkEntry :: Html -> Html -> Html
-mkEntry left right =
-  (H.div ! class_ "resume-hint" $ left)
-    <> (H.div ! class_ "resume-description" $ right)
+mkEntry :: Html () -> Html () -> Html ()
+mkEntry left right = do
+  div_ [class_ "resume-hint"] left
+  div_ [class_ "resume-description"] right
 
-instance ToMarkup a => ToMarkup (Section a) where
-  toMarkup Section {content = content_, ..} =
-    h2 (toHtml heading) <> toHtml content_
+mkSection :: ToHtml a => Section a -> Html ()
+mkSection Section {..} = do
+  h2_ $ toHtml heading
+  mkSectionContent content
 
-instance ToMarkup a => ToMarkup (SectionContent a) where
-  toMarkup = \case
-    Paragraph _ -> error "not implemented"
-    Work xs -> entries . mconcat $ fmap toHtml xs
-    Volunteering _ -> error "not implemented"
-    Skills xs -> entries . mconcat $ fmap toHtml xs
-    Education xs -> entries . mconcat $ fmap toHtml xs
-    Awards _ -> error "not implemented"
-    Publications _ -> error "not implemented"
-    Languages _ -> error "not implemented"
-    Interests _ -> error "not implemented"
+mkSectionContent :: ToHtml a => SectionContent a -> Html ()
+mkSectionContent = \case
+  Paragraph _ -> error "not implemented"
+  Work xs -> entries . mconcat $ fmap mkJob xs
+  Volunteering _ -> error "not implemented"
+  Skills xs -> entries . mconcat $ fmap mkSkill xs
+  Education xs -> entries . mconcat $ fmap mkStudy xs
+  Awards _ -> error "not implemented"
+  Publications _ -> error "not implemented"
+  Languages _ -> error "not implemented"
+  Interests _ -> error "not implemented"
 
-instance ToMarkup Date where
-  toMarkup Date {..} = toMarkup month <> "/" <> toMarkup year
+mkDate :: Date -> Html ()
+mkDate Date {..} = toHtml (show month <> "/" <> show year)
 
-instance ToMarkup a => ToMarkup (Job a) where
-  toMarkup Job {..} =
-    mkEntry
-      (toHtml jobStartDate <> maybe mempty ((" - " <>) . toHtml) jobEndDate)
-      $ ( H.div
-            ! class_ (textValue "resume-entry-heading")
-            $ (H.span ! class_ (textValue "resume-entry-title") $ toHtml position)
-              <> ( H.span ! class_ (textValue "resume-entry-company") $
-                     toHtml
-                       company
-                 )
-              <> maybe
-                mempty
-                ( \t ->
-                    H.span ! class_ (textValue "resume-entry-location") $ toHtml t
-                )
-                jobLocation
-        )
-        <> maybe
-          mempty
-          (\t -> H.div ! class_ "resume-entry-summary" $ toHtml t)
-          jobSummary
+mkJob :: ToHtml a => Job a -> Html ()
+mkJob Job {..} =
+  mkEntry
+    (mkDate jobStartDate <> foldMap ((" - " <>) . mkDate) jobEndDate)
+    $ do
+      div_ [class_ "resume-entry-heading"] $ do
+        span_ [class_ "resume-entry-title"] $ toHtml position
+        span_ [class_ "resume-entry-company"] $
+          toHtml
+            company
+        foldMap
+          ( span_ [class_ "resume-entry-location"] . toHtml
+          )
+          jobLocation
+      foldMap
+        (div_ [class_ "resume-entry-summary"] . toHtmlRaw)
+        jobSummary
 
-instance ToMarkup a => ToMarkup (Skill a) where
-  toMarkup Skill {..} =
-    mkEntry (toHtml skillArea) $ maybe mempty toHtml skillSummary
+mkSkill :: ToHtml a => Skill a -> Html ()
+mkSkill Skill {..} =
+  mkEntry (toHtmlRaw skillArea) $ foldMap toHtmlRaw skillSummary
 
-instance ToMarkup a => ToMarkup (Study a) where
-  toMarkup Study {..} =
-    mkEntry
-      ( toHtml studyStartDate
-          <> maybe mempty ((" - " <>) . toHtml) studyEndDate
-      )
-      $ ( H.div
-            ! class_ (textValue "resume-entry-heading")
-            $ ( H.span ! class_ (textValue "resume-entry-title") $
-                  toHtml
-                    (studyType <> ", " <> area)
-              )
-              <> ( H.span ! class_ (textValue "resume-entry-company") $
-                     toHtml
-                       institution
-                 )
-              <> maybe
-                mempty
-                ( \t ->
-                    H.span ! class_ (textValue "resume-entry-location") $ toHtml t
-                )
-                studyLocation
-        )
-        <> maybe
-          mempty
-          (\t -> H.div ! class_ "resume-entry-summary" $ toHtml t)
-          studySummary
+mkStudy :: ToHtml a => Study a -> Html ()
+mkStudy Study {..} =
+  mkEntry
+    ( mkDate studyStartDate <> foldMap ((" - " <>) . mkDate) studyEndDate
+    )
+    $ do
+      div_ [class_ "resume-entry-heading"] $ do
+        span_ [class_ "resume-entry-title"] $
+          toHtml
+            (studyType <> ", " <> area)
+        span_ [class_ "resume-entry-company"] $
+          toHtml
+            institution
+        foldMap
+          ( span_ [class_ "resume-entry-location"] . toHtml
+          )
+          studyLocation
+      foldMap
+        (div_ [class_ "resume-entry-summary"] . toHtmlRaw)
+        studySummary
