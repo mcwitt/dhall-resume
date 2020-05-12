@@ -1,4 +1,4 @@
-{ compiler ? "ghc865", withHoogle ? false }:
+{ compiler ? "ghc883", withHoogle ? false }:
 
 let
   bootstrap = import <nixpkgs> { };

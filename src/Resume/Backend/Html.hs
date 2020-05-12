@@ -12,7 +12,6 @@ where
 
 import Clay ((#), (<?), (?), Css, em, pc, px)
 import qualified Clay as C
-import Control.Monad ((>=>))
 import Control.Monad.Reader
 import Data.Default
 import Data.Foldable
