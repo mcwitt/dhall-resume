@@ -7,6 +7,7 @@ module Resume.Backend.Html
     def,
     resumeBody,
     resumeHead,
+    runHtmlGenerator,
   )
 where
 
@@ -62,14 +63,16 @@ instance Default HtmlBackendOptions where
                 C.div # ".resume-entry-summary" <? C.ul <? C.paddingLeft (em 1)
       }
 
-type HtmlGenerator = HtmlT (Reader HtmlBackendOptions)
-
 compileHtml :: HtmlBackendOptions -> Resume Markdown -> Either PandocError Text
-compileHtml opts r = TL.toStrict . mkResume <$> traverse fromMarkdown r
+compileHtml opts r = runHtmlGenerator opts . resume <$> traverse fromMarkdown r
   where
-    mkResume = flip runReader opts . renderTextT . resume
     fromMarkdown =
       P.runPure . (P.readMarkdown def >=> P.writeHtml5String def) . unMarkdown
+
+type HtmlGenerator = HtmlT (Reader HtmlBackendOptions)
+
+runHtmlGenerator :: HtmlBackendOptions -> HtmlGenerator a -> Text
+runHtmlGenerator opts = TL.toStrict . flip runReader opts . renderTextT
 
 resume :: Resume Text -> HtmlGenerator ()
 resume r = html_ [lang_ "en"] $ do
