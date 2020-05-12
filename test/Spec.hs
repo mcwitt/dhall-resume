@@ -2,7 +2,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 
 import Data.Text
-import Resume (readMarkdownResume)
+import Resume (parseResume)
 import Resume.Types
 import Test.Hspec
 import Text.RawString.QQ
@@ -233,4 +233,4 @@ main :: IO ()
 main = hspec $ do
   describe "Frontend" $ do
     it "should parse simple example" $ do
-      readMarkdownResume exampleInput `shouldReturn` exampleResume
+      parseResume exampleInput `shouldReturn` exampleResume

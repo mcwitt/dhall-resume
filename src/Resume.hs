@@ -3,16 +3,15 @@
 module Resume
   ( Backend (..),
     compile,
-    readMarkdownResume,
+    parseResume,
+    readResume,
   )
 where
 
+import Data.Text.IO as TIO
 import Dhall
 import Resume.Backend.Html
-  ( compileHtml,
-    def,
-  )
-import Resume.Backend.LaTeX (compileLaTeX)
+import Resume.Backend.LaTeX
 import Resume.Types
 
 data Backend
@@ -20,16 +19,19 @@ data Backend
   | Html
   deriving (Eq, Show)
 
-readMarkdownResume :: Text -> IO (Resume Markdown)
-readMarkdownResume = (fmap . fmap) Markdown . input auto
+parseResume :: Text -> IO (Resume Markdown)
+parseResume = (fmap . fmap) Markdown . input auto
+
+readResume :: FilePath -> IO (Resume Markdown)
+readResume path = TIO.readFile path >>= parseResume
 
 -- | Compile resume using selected backend. Interprets text fields as Markdown.
-compile :: Backend -> Text -> IO Text
-compile backend inp = do
-  r <- readMarkdownResume inp
+compile :: Backend -> FilePath -> IO Text
+compile backend path = do
+  r <- readResume path
   let compiler = case backend of
-        LaTeX -> compileLaTeX
-        Html -> compileHtml def
+        LaTeX -> Resume.Backend.LaTeX.renderResume
+        Html -> Resume.Backend.Html.renderResume def
   case compiler r of
     Right t -> return t
     Left e -> error $ "Pandoc error: " <> show e

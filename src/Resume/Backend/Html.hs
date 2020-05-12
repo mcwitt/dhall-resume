@@ -3,11 +3,12 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Resume.Backend.Html
-  ( compileHtml,
-    def,
+  ( render,
+    renderResume,
     resumeBody,
     resumeHead,
     runHtmlGenerator,
+    def,
   )
 where
 
@@ -63,16 +64,19 @@ instance Default HtmlBackendOptions where
                 C.div # ".resume-entry-summary" <? C.ul <? C.paddingLeft (em 1)
       }
 
-compileHtml :: HtmlBackendOptions -> Resume Markdown -> Either PandocError Text
-compileHtml opts r = runHtmlGenerator opts . resume <$> traverse fromMarkdown r
-  where
-    fromMarkdown =
-      P.runPure . (P.readMarkdown def >=> P.writeHtml5String def) . unMarkdown
-
 type HtmlGenerator = HtmlT (Reader HtmlBackendOptions)
 
 runHtmlGenerator :: HtmlBackendOptions -> HtmlGenerator a -> Text
 runHtmlGenerator opts = TL.toStrict . flip runReader opts . renderTextT
+
+render :: (Resume Text -> HtmlGenerator ()) -> HtmlBackendOptions -> Resume Markdown -> Either PandocError Text
+render gen opts rm = runHtmlGenerator opts . gen <$> traverse fromMarkdown rm
+
+renderResume :: HtmlBackendOptions -> Resume Markdown -> Either PandocError Text
+renderResume = render resume
+
+fromMarkdown :: Markdown -> Either PandocError Text
+fromMarkdown = P.runPure . (P.readMarkdown def >=> P.writeHtml5String def) . unMarkdown
 
 resume :: Resume Text -> HtmlGenerator ()
 resume r = html_ [lang_ "en"] $ do

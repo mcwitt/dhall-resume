@@ -12,17 +12,17 @@ import Resume
   )
 import System.IO
 
-data Args = Args {inputPath :: FilePath, _backend :: Backend, outputPath :: FilePath}
+data Args = Args {inputPath :: FilePath, backend :: Backend, outputPath :: FilePath}
 
-backend :: Parser Backend
-backend = flag' LaTeX (long "latex") <|> flag' Html (long "html")
+parseBackend :: Parser Backend
+parseBackend = flag' LaTeX (long "latex") <|> flag' Html (long "html")
 
-args :: Parser Args
-args =
+parseArgs :: Parser Args
+parseArgs =
   Args
     <$> strOption
       (long "file" <> short 'f' <> metavar "FILENAME" <> help "Input file")
-    <*> backend
+    <*> parseBackend
     <*> strOption
       ( long "output" <> short 'o' <> metavar "FILENAME"
           <> help
@@ -36,9 +36,9 @@ main = do
   where
     opts =
       info
-        (args <**> helper)
+        (parseArgs <**> helper)
         (fullDesc <> progDesc "Compile resume from Dhall configuration")
 
 run :: Args -> IO ()
 run Args {..} =
-  TIO.readFile inputPath >>= compile _backend >>= TIO.writeFile outputPath
+  compile backend inputPath >>= TIO.writeFile outputPath
