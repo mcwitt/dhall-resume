@@ -5,12 +5,15 @@
 module Resume.Backend.Html
   ( compileHtml,
     def,
+    resumeBody,
+    resumeHead,
   )
 where
 
 import Clay ((#), (<?), (?), Css, em, pc, px)
 import qualified Clay as C
 import Control.Monad ((>=>))
+import Control.Monad.Reader
 import Data.Default
 import Data.Foldable
 import Data.Maybe
@@ -60,96 +63,105 @@ instance Default HtmlBackendOptions where
                 C.div # ".resume-entry-summary" <? C.ul <? C.paddingLeft (em 1)
       }
 
+type HtmlGenerator = HtmlT (Reader HtmlBackendOptions)
+
 compileHtml :: HtmlBackendOptions -> Resume Markdown -> Either PandocError Text
-compileHtml opts r = TL.toStrict . renderText . mkResume opts <$> traverse fromMarkdown r
+compileHtml opts r = TL.toStrict . mkResume <$> traverse fromMarkdown r
   where
+    mkResume = flip runReader opts . renderTextT . resume
     fromMarkdown =
       P.runPure . (P.readMarkdown def >=> P.writeHtml5String def) . unMarkdown
 
-mkResume :: HtmlBackendOptions -> Resume Text -> Html ()
-mkResume opts Resume {..} =
-  html_ [lang_ "en"] $ do
-    head_ $ do
-      meta_ [httpEquiv_ "Content-Type", content_ "text/html; charset=utf-8"]
-      title_ $ toHtml $ let r = R.name basics in firstName r <> " " <> lastName r
-      mconcat $
-        ( \path ->
-            link_ [rel_ "stylesheet", type_ "text/css", href_ path]
-        )
-          <$> cssUrls opts
-      foldMap (style_ [type_ "text/css"] . C.render) $ style opts
-    body_ $ do
-      h1_
-        ( let r = R.name basics
-           in toHtml $ firstName r <> " " <> lastName r
-        )
-      div_ [class_ "contact-info"]
-        $ ul_
-        $ do
-          mkContactItem
-            (email basics)
-            (Just $ "mailto:" <> email basics)
-            (Just "fa fa-envelope")
-          foldMap
-            (\t -> mkContactItem t (Just t) (Just "fa fa-globe"))
-            (homepage profiles)
-          foldMap
-            (mkSocialItem "//www.linkedin.com/in" "fa fa-linkedin")
-            (linkedin profiles)
-          foldMap
-            (mkSocialItem "//www.twitter.com/" "fa fa-twitter")
-            (twitter profiles)
-          foldMap
-            (mkSocialItem "//www.github.com/" "fa fa-github")
-            (github profiles)
-      mconcat (fmap mkSection sections)
+resume :: Resume Text -> HtmlGenerator ()
+resume r = html_ [lang_ "en"] $ do
+  head_ $ resumeHead r
+  body_ $ resumeBody r
 
-mkSocialItem :: Text -> Text -> Social -> Html ()
-mkSocialItem baseUrl iconClass Social {..} =
-  mkContactItem
+resumeHead :: Resume Text -> HtmlGenerator ()
+resumeHead Resume {..} = do
+  opts <- ask
+  meta_ [httpEquiv_ "Content-Type", content_ "text/html; charset=utf-8"]
+  title_ $ toHtml $ let r = R.name basics in firstName r <> " " <> lastName r
+  mconcat $
+    ( \path ->
+        link_ [rel_ "stylesheet", type_ "text/css", href_ path]
+    )
+      <$> cssUrls opts
+  foldMap (style_ [type_ "text/css"] . C.render) $ style opts
+
+resumeBody :: Resume Text -> HtmlGenerator ()
+resumeBody Resume {..} = do
+  h1_
+    ( let r = R.name basics
+       in toHtml $ firstName r <> " " <> lastName r
+    )
+  div_ [class_ "contact-info"]
+    $ ul_
+    $ do
+      contactItem
+        (email basics)
+        (Just $ "mailto:" <> email basics)
+        (Just "fa fa-envelope")
+      foldMap
+        (\t -> contactItem t (Just t) (Just "fa fa-globe"))
+        (homepage profiles)
+      foldMap
+        (socialItem "//www.linkedin.com/in" "fa fa-linkedin")
+        (linkedin profiles)
+      foldMap
+        (socialItem "//www.twitter.com/" "fa fa-twitter")
+        (twitter profiles)
+      foldMap
+        (socialItem "//www.github.com/" "fa fa-github")
+        (github profiles)
+  mapM_ section sections
+
+socialItem :: Text -> Text -> Social -> HtmlGenerator ()
+socialItem baseUrl iconClass Social {..} =
+  contactItem
     user
     (Just url_)
     (Just iconClass)
   where
     url_ = fromMaybe (baseUrl <> user) url
 
-mkContactItem :: Text -> Maybe Text -> Maybe Text -> Html ()
-mkContactItem t url iconClass =
+contactItem :: Text -> Maybe Text -> Maybe Text -> HtmlGenerator ()
+contactItem t url iconClass =
   li_
     $ a_ (toList $ fmap href_ url)
     $ do
       foldMap (\ic -> i_ [class_ ic] mempty) iconClass
       toHtml t
 
-mkEntry :: Html () -> Html () -> Html ()
-mkEntry left right = div_ [class_ "resume-entry"] $ do
+entry :: Monad m => HtmlT m () -> HtmlT m () -> HtmlT m ()
+entry left right = div_ [class_ "resume-entry"] $ do
   div_ [class_ "resume-hint"] left
   div_ [class_ "resume-description"] right
 
-mkSection :: ToHtml a => Section a -> Html ()
-mkSection Section {..} = do
+section :: ToHtml a => Section a -> HtmlGenerator ()
+section Section {..} = do
   h2_ $ toHtml heading
-  mkSectionContent content
+  sectionContent content
 
-mkSectionContent :: ToHtml a => SectionContent a -> Html ()
-mkSectionContent = \case
+sectionContent :: ToHtml a => SectionContent a -> HtmlGenerator ()
+sectionContent = \case
   Paragraph _ -> error "not implemented"
-  Work xs -> mconcat $ fmap mkJob xs
+  Work xs -> mconcat $ fmap job xs
   Volunteering _ -> error "not implemented"
-  Skills xs -> mconcat $ fmap mkSkill xs
-  Education xs -> mconcat $ fmap mkStudy xs
+  Skills xs -> mconcat $ fmap skill xs
+  Education xs -> mconcat $ fmap study xs
   Awards _ -> error "not implemented"
   Publications _ -> error "not implemented"
   Languages _ -> error "not implemented"
   Interests _ -> error "not implemented"
 
-mkDate :: Date -> Html ()
-mkDate Date {..} = toHtml (show month <> "/" <> show year)
+date :: Date -> HtmlGenerator ()
+date Date {..} = toHtml (show month <> "/" <> show year)
 
-mkJob :: ToHtml a => Job a -> Html ()
-mkJob Job {..} =
-  mkEntry
-    (mkDate jobStartDate <> foldMap ((" - " <>) . mkDate) jobEndDate)
+job :: ToHtml a => Job a -> HtmlGenerator ()
+job Job {..} =
+  entry
+    (date jobStartDate <> foldMap ((" - " <>) . date) jobEndDate)
     $ do
       div_ [class_ "resume-entry-heading"] $ do
         span_ [class_ "resume-entry-title"] $ toHtml position
@@ -164,16 +176,16 @@ mkJob Job {..} =
         (div_ [class_ "resume-entry-summary"] . toHtmlRaw)
         jobSummary
 
-mkSkill :: ToHtml a => Skill a -> Html ()
-mkSkill Skill {..} =
-  mkEntry (toHtmlRaw skillArea)
+skill :: ToHtml a => Skill a -> HtmlGenerator ()
+skill Skill {..} =
+  entry (toHtmlRaw skillArea)
     $ div_ [class_ "resume-entry-summary"]
     $ foldMap toHtmlRaw skillSummary
 
-mkStudy :: ToHtml a => Study a -> Html ()
-mkStudy Study {..} =
-  mkEntry
-    ( mkDate studyStartDate <> foldMap ((" - " <>) . mkDate) studyEndDate
+study :: ToHtml a => Study a -> HtmlGenerator ()
+study Study {..} =
+  entry
+    ( date studyStartDate <> foldMap ((" - " <>) . date) studyEndDate
     )
     $ do
       div_ [class_ "resume-entry-heading"] $ do
