@@ -45,7 +45,7 @@ data Location
 
 data Profiles
   = Profiles
-      { homepage :: Maybe Text,
+      { homepage :: Maybe Link,
         linkedin :: Maybe Social,
         github :: Maybe Social,
         twitter :: Maybe Social
@@ -66,10 +66,17 @@ data Language
       }
   deriving (Generic, FromDhall, Eq, Show)
 
+data Link
+  = Link
+      { url :: Text,
+        label :: Maybe Text
+      }
+  deriving (Generic, FromDhall, Eq, Show)
+
 data Social
   = Social
       { user :: Text,
-        url :: Maybe Text
+        profileUrl :: Maybe Text
       }
   deriving (Generic, FromDhall, Eq, Show)
 

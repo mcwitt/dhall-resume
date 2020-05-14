@@ -109,7 +109,12 @@ resumeBody Resume {..} = do
         (Just $ "mailto:" <> email basics)
         (Just "fa fa-envelope")
       foldMap
-        (\t -> contactItem t (Just t) (Just "fa fa-globe"))
+        ( \Link {..} ->
+            contactItem
+              (fromMaybe url label)
+              (Just url)
+              (Just "fa fa-globe")
+        )
         (homepage profiles)
       foldMap
         (socialItem "//www.linkedin.com/in" "fa fa-linkedin")
@@ -129,7 +134,7 @@ socialItem baseUrl iconClass Social {..} =
     (Just url_)
     (Just iconClass)
   where
-    url_ = fromMaybe (baseUrl <> user) url
+    url_ = fromMaybe (baseUrl <> user) profileUrl
 
 contactItem :: Text -> Maybe Text -> Maybe Text -> HtmlGenerator ()
 contactItem t url iconClass =

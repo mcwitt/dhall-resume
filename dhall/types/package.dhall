@@ -8,6 +8,7 @@
       , Interest = ./Interest.dhall a
       , Job = ./Job.dhall a
       , Language = ./Language.dhall
+      , Link = ./Link.dhall
       , Location = ./Location.dhall
       , Name = ./Name.dhall
       , Profiles = ./Profiles.dhall

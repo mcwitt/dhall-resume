@@ -21,10 +21,10 @@ in  { basics =
               { address = "", city = "", postalCode = "", country = Some "" }
         }
     , profiles =
-        { homepage = Some ""
-        , linkedin = Some { user = "", url = Some "" }
-        , github = Some { user = "", url = Some "" }
-        , twitter = Some { user = "", url = Some "" }
+        { homepage = Some { url = "", label = Some "" }
+        , linkedin = Some { user = "", profileUrl = Some "" }
+        , github = Some { user = "", profileUrl = Some "" }
+        , twitter = Some { user = "", profileUrl = Some "" }
         }
     , headline = Some ""
     , sections =
@@ -132,7 +132,7 @@ exampleResume =
             },
         profiles =
           Profiles
-            { homepage = Just "",
+            { homepage = Just $ Link "" $ Just "",
               linkedin = Just $ Social "" $ Just "",
               github = Just $ Social "" $ Just "",
               twitter = Just $ Social "" $ Just ""

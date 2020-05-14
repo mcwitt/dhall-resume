@@ -9,7 +9,7 @@ where
 import Control.Monad ((>=>))
 import Data.Maybe
 import qualified Data.Text as T
-import Resume.Types
+import Resume.Types as R
 import Text.LaTeX
 import Text.LaTeX.Base.Syntax
 import Text.Pandoc
@@ -34,7 +34,7 @@ toLaTeX Resume {..} =
     <> TeXComm "email" [FixArg . TeXRaw $ email basics]
     <> maybe
       mempty
-      (\h -> TeXComm "homepage" [FixArg $ TeXRaw h])
+      (\R.Link {url = url} -> TeXComm "homepage" [FixArg $ TeXRaw url])
       (homepage profiles)
     <> maybe mempty (mkSocial "linkedin") (linkedin profiles)
     <> maybe mempty (mkSocial "twitter") (twitter profiles)

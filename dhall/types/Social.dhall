@@ -1,1 +1,1 @@
-{ user : Text, url : Optional Text }
+{ user : Text, profileUrl : Optional Text }
