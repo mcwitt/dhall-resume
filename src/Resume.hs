@@ -3,6 +3,7 @@
 module Resume
   ( Backend (..),
     compile,
+    defaultInputSettings,
     parseResume,
     readResume,
   )
@@ -19,16 +20,19 @@ data Backend
   | Html
   deriving (Eq, Show)
 
-parseResume :: Text -> IO (Resume Markdown)
-parseResume = (fmap . fmap) Markdown . input auto
+parseResume :: InputSettings -> Text -> IO (Resume Markdown)
+parseResume settings inp =
+  fmap Markdown
+    <$> inputWithSettings settings auto inp
 
-readResume :: FilePath -> IO (Resume Markdown)
-readResume path = TIO.readFile path >>= parseResume
+readResume :: InputSettings -> FilePath -> IO (Resume Markdown)
+readResume settings path = TIO.readFile path >>= parseResume settings
 
--- | Compile resume using selected backend. Interprets text fields as Markdown.
+-- | Compile resume using selected backend.
+-- Interprets text fields as Markdown.
 compile :: Backend -> FilePath -> IO Text
 compile backend path = do
-  r <- readResume path
+  r <- readResume defaultInputSettings path
   let compiler = case backend of
         LaTeX -> Resume.Backend.LaTeX.renderText
         Html -> Resume.Backend.Html.renderText def
