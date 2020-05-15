@@ -3,9 +3,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Resume.Backend.Html
-  ( renderHtml,
+  ( defaultStyle,
+    renderHtml,
     renderHtmlBody,
-    renderHtmlHead,
     renderText,
     def,
   )
@@ -39,31 +39,34 @@ instance Default HtmlBackendOptions where
           [ "https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css",
             "https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
           ],
-        style = Just $
-          C.body ? do
-            C.margin (em 4) (pc 20) (em 1) (pc 20)
-            C.div # ".contact-info" <? C.ul <? do
-              C.paddingLeft $ px 0
-              C.listStyleType C.none
-              C.li <? do
-                C.display C.inline
-                C.paddingRight $ em 1
-                C.a <? C.i <? C.paddingRight (px 5)
-            C.div # ".resume-entry" ? do
-              C.display C.flex
-              C.flexDirection C.row
-              C.div # ".resume-hint" <? do
-                C.flexBasis $ px 100
-                C.flexGrow 0
-                C.flexShrink 0
-              C.div # ".resume-description" <? do
-                C.width (pc 100)
-                C.div # ".resume-entry-heading" <? do
-                  C.span <? C.paddingRight (em 1)
-                  C.span # ".resume-entry-title" <? C.fontWeight C.bold
-                  C.span # ".resume-entry-company" <? C.fontStyle C.italic
-                C.div # ".resume-entry-summary" <? C.ul <? C.paddingLeft (em 1)
+        style = Just defaultStyle
       }
+
+defaultStyle :: Css
+defaultStyle =
+  C.body ? do
+    C.margin (em 4) (pc 20) (em 1) (pc 20)
+    C.div # ".contact-info" <? C.ul <? do
+      C.paddingLeft $ px 0
+      C.listStyleType C.none
+      C.li <? do
+        C.display C.inline
+        C.paddingRight $ em 1
+        C.a <? C.i <? C.paddingRight (px 5)
+    C.div # ".resume-entry" ? do
+      C.display C.flex
+      C.flexDirection C.row
+      C.div # ".resume-hint" <? do
+        C.flexBasis $ px 100
+        C.flexGrow 0
+        C.flexShrink 0
+      C.div # ".resume-description" <? do
+        C.width (pc 100)
+        C.div # ".resume-entry-heading" <? do
+          C.span <? C.paddingRight (em 1)
+          C.span # ".resume-entry-title" <? C.fontWeight C.bold
+          C.span # ".resume-entry-company" <? C.fontStyle C.italic
+        C.div # ".resume-entry-summary" <? C.ul <? C.paddingLeft (em 1)
 
 mkRender ::
   (Resume Text -> HtmlM ()) ->
@@ -83,12 +86,6 @@ renderHtml ::
   Resume Markdown ->
   Either PandocError (Html ())
 renderHtml = mkRender resume
-
-renderHtmlHead ::
-  HtmlBackendOptions ->
-  Resume Markdown ->
-  Either PandocError (Html ())
-renderHtmlHead = mkRender resumeHead
 
 renderHtmlBody ::
   HtmlBackendOptions ->

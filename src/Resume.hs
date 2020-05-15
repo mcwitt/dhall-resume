@@ -6,6 +6,7 @@ module Resume
     defaultInputSettings,
     parseResume,
     readResume,
+    rootDirectory,
   )
 where
 
