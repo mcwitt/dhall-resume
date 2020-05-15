@@ -30,8 +30,8 @@ compile :: Backend -> FilePath -> IO Text
 compile backend path = do
   r <- readResume path
   let compiler = case backend of
-        LaTeX -> Resume.Backend.LaTeX.renderResume
-        Html -> Resume.Backend.Html.renderResume def
+        LaTeX -> Resume.Backend.LaTeX.renderText
+        Html -> Resume.Backend.Html.renderText def
   case compiler r of
     Right t -> return t
     Left e -> error $ "Pandoc error: " <> show e

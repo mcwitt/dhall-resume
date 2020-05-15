@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Resume.Backend.LaTeX
-  ( renderResume,
+  ( renderText,
   )
 where
 
@@ -15,8 +15,8 @@ import Text.LaTeX.Base.Syntax
 import Text.Pandoc
 
 -- | Render Resume with Markdown-formatted text as LaTeX
-renderResume :: Resume Markdown -> Either PandocError Text
-renderResume r = render . toLaTeX <$> traverse fromMarkdown r
+renderText :: Resume Markdown -> Either PandocError Text
+renderText r = render . toLaTeX <$> traverse fromMarkdown r
   where
     fromMarkdown = runPure . (readMarkdown def >=> writeLaTeX def) . unMarkdown
 

@@ -3,11 +3,10 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Resume.Backend.Html
-  ( render,
-    renderResume,
-    resumeBody,
-    resumeHead,
-    runHtmlGenerator,
+  ( renderHtml,
+    renderHtmlBody,
+    renderHtmlHead,
+    renderText,
     def,
   )
 where
@@ -20,7 +19,9 @@ import Data.Foldable
 import Data.Maybe
 import Data.Text
 import qualified Data.Text.Lazy as TL
-import Lucid
+import Lucid hiding (renderText)
+import qualified Lucid
+import Lucid.Base (commuteHtmlT)
 import Resume.Types as R
 import Text.Pandoc (PandocError)
 import qualified Text.Pandoc as P
@@ -64,26 +65,57 @@ instance Default HtmlBackendOptions where
                 C.div # ".resume-entry-summary" <? C.ul <? C.paddingLeft (em 1)
       }
 
-type HtmlGenerator = HtmlT (Reader HtmlBackendOptions)
+mkRender ::
+  (Resume Text -> HtmlM ()) ->
+  HtmlBackendOptions ->
+  Resume Markdown ->
+  Either PandocError (Html ())
+mkRender part opts =
+  fmap
+    ( flip runReader opts
+        . commuteHtmlT
+        . part
+    )
+    . traverse fromMarkdown
 
-runHtmlGenerator :: HtmlBackendOptions -> HtmlGenerator a -> Text
-runHtmlGenerator opts = TL.toStrict . flip runReader opts . renderTextT
+renderHtml ::
+  HtmlBackendOptions ->
+  Resume Markdown ->
+  Either PandocError (Html ())
+renderHtml = mkRender resume
 
-render :: (Resume Text -> HtmlGenerator ()) -> HtmlBackendOptions -> Resume Markdown -> Either PandocError Text
-render gen opts rm = runHtmlGenerator opts . gen <$> traverse fromMarkdown rm
+renderHtmlHead ::
+  HtmlBackendOptions ->
+  Resume Markdown ->
+  Either PandocError (Html ())
+renderHtmlHead = mkRender resumeHead
 
-renderResume :: HtmlBackendOptions -> Resume Markdown -> Either PandocError Text
-renderResume = render resume
+renderHtmlBody ::
+  HtmlBackendOptions ->
+  Resume Markdown ->
+  Either PandocError (Html ())
+renderHtmlBody = mkRender resumeBody
+
+renderText ::
+  HtmlBackendOptions ->
+  Resume Markdown ->
+  Either PandocError Text
+renderText opts = fmap (TL.toStrict . Lucid.renderText) . renderHtml opts
 
 fromMarkdown :: Markdown -> Either PandocError Text
-fromMarkdown = P.runPure . (P.readMarkdown def >=> P.writeHtml5String def) . unMarkdown
+fromMarkdown =
+  P.runPure
+    . (P.readMarkdown def >=> P.writeHtml5String def)
+    . unMarkdown
 
-resume :: Resume Text -> HtmlGenerator ()
+type HtmlM = HtmlT (Reader HtmlBackendOptions)
+
+resume :: Resume Text -> HtmlM ()
 resume r = html_ [lang_ "en"] $ do
   head_ $ resumeHead r
   body_ $ resumeBody r
 
-resumeHead :: Resume Text -> HtmlGenerator ()
+resumeHead :: Resume Text -> HtmlM ()
 resumeHead Resume {..} = do
   opts <- ask
   meta_ [httpEquiv_ "Content-Type", content_ "text/html; charset=utf-8"]
@@ -95,7 +127,7 @@ resumeHead Resume {..} = do
       <$> cssUrls opts
   foldMap (style_ [type_ "text/css"] . C.render) $ style opts
 
-resumeBody :: Resume Text -> HtmlGenerator ()
+resumeBody :: Resume Text -> HtmlM ()
 resumeBody Resume {..} = do
   h1_
     ( let r = R.name basics
@@ -127,7 +159,7 @@ resumeBody Resume {..} = do
         (github profiles)
   mapM_ section sections
 
-socialItem :: Text -> Text -> Social -> HtmlGenerator ()
+socialItem :: Text -> Text -> Social -> HtmlM ()
 socialItem baseUrl iconClass Social {..} =
   contactItem
     user
@@ -136,7 +168,7 @@ socialItem baseUrl iconClass Social {..} =
   where
     url_ = fromMaybe (baseUrl <> user) profileUrl
 
-contactItem :: Text -> Maybe Text -> Maybe Text -> HtmlGenerator ()
+contactItem :: Text -> Maybe Text -> Maybe Text -> HtmlM ()
 contactItem t url iconClass =
   li_
     $ a_ (toList $ fmap href_ url)
@@ -149,12 +181,12 @@ entry left right = div_ [class_ "resume-entry"] $ do
   div_ [class_ "resume-hint"] left
   div_ [class_ "resume-description"] right
 
-section :: ToHtml a => Section a -> HtmlGenerator ()
+section :: ToHtml a => Section a -> HtmlM ()
 section Section {..} = do
   h2_ $ toHtml heading
   sectionContent content
 
-sectionContent :: ToHtml a => SectionContent a -> HtmlGenerator ()
+sectionContent :: ToHtml a => SectionContent a -> HtmlM ()
 sectionContent = \case
   Paragraph _ -> error "not implemented"
   Work xs -> mconcat $ fmap job xs
@@ -166,10 +198,10 @@ sectionContent = \case
   Languages _ -> error "not implemented"
   Interests _ -> error "not implemented"
 
-date :: Date -> HtmlGenerator ()
+date :: Date -> HtmlM ()
 date Date {..} = toHtml (show month <> "/" <> show year)
 
-job :: ToHtml a => Job a -> HtmlGenerator ()
+job :: ToHtml a => Job a -> HtmlM ()
 job Job {..} =
   entry
     (date jobStartDate <> foldMap ((" - " <>) . date) jobEndDate)
@@ -187,13 +219,13 @@ job Job {..} =
         (div_ [class_ "resume-entry-summary"] . toHtmlRaw)
         jobSummary
 
-skill :: ToHtml a => Skill a -> HtmlGenerator ()
+skill :: ToHtml a => Skill a -> HtmlM ()
 skill Skill {..} =
   entry (toHtmlRaw skillArea)
     $ div_ [class_ "resume-entry-summary"]
     $ foldMap toHtmlRaw skillSummary
 
-study :: ToHtml a => Study a -> HtmlGenerator ()
+study :: ToHtml a => Study a -> HtmlM ()
 study Study {..} =
   entry
     ( date studyStartDate <> foldMap ((" - " <>) . date) studyEndDate
