@@ -130,6 +130,7 @@ resumeBody Resume {..} = do
     ( let r = R.name basics
        in toHtml $ firstName r <> " " <> lastName r
     )
+  foldMap (h2_ . toHtmlRaw) headline
   div_ [class_ "contact-info"]
     $ ul_
     $ do
