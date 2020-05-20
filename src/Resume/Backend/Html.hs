@@ -3,9 +3,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Resume.Backend.Html
-  ( defaultStyle,
-    renderHtml,
+  ( renderHtml,
     renderHtmlBody,
+    renderHtmlStyles,
     renderText,
     def,
   )
@@ -93,6 +93,9 @@ renderHtmlBody ::
   Either PandocError (Html ())
 renderHtmlBody = mkRender resumeBody
 
+renderHtmlStyles :: HtmlBackendOptions -> Html ()
+renderHtmlStyles opts = flip runReader opts . commuteHtmlT $ resumeStyles
+
 renderText ::
   HtmlBackendOptions ->
   Resume Markdown ->
@@ -114,9 +117,13 @@ resume r = html_ [lang_ "en"] $ do
 
 resumeHead :: Resume Text -> HtmlM ()
 resumeHead Resume {..} = do
-  opts <- ask
   meta_ [httpEquiv_ "Content-Type", content_ "text/html; charset=utf-8"]
   maybe "Resume" (\Name {..} -> title_ . toHtml $ firstName <> " " <> lastName) (name basics)
+  resumeStyles
+
+resumeStyles :: HtmlM ()
+resumeStyles = do
+  opts <- ask
   mconcat $
     ( \path ->
         link_ [rel_ "stylesheet", type_ "text/css", href_ path]
