@@ -27,19 +27,17 @@ toLaTeX Resume {..} =
     <> usepackage [TeXRaw "scale=0.8"] "geometry"
     <> TeXComm "moderncvstyle" [FixArg "casual"]
     <> TeXComm "moderncvcolor" [FixArg "blue"]
-    <> maybe mempty (title . TeXRaw) headline
-    <> maybe
-      mempty
+    <> foldMap (title . TeXRaw) headline
+    <> foldMap
       (\Name {..} -> TeXComm "name" (fixArgs [firstName, lastName]))
       (name basics)
     <> TeXComm "email" [FixArg . TeXRaw $ email basics]
-    <> maybe
-      mempty
+    <> foldMap
       (\R.Link {url = url} -> TeXComm "homepage" [FixArg $ TeXRaw url])
       (homepage profiles)
-    <> maybe mempty (mkSocial "linkedin") (linkedin profiles)
-    <> maybe mempty (mkSocial "twitter") (twitter profiles)
-    <> maybe mempty (mkSocial "github") (github profiles)
+    <> foldMap (mkSocial "linkedin") (linkedin profiles)
+    <> foldMap (mkSocial "twitter") (twitter profiles)
+    <> foldMap (mkSocial "github") (github profiles)
     <> case location basics of
       StreetAddress {..} ->
         TeXComm
@@ -48,8 +46,7 @@ toLaTeX Resume {..} =
               [address, T.unwords [city, postalCode], fromMaybe "" country]
           )
       _ -> mempty
-    <> maybe
-      mempty
+    <> foldMap
       (\p -> TeXComm "phone" [OptArg "mobile", FixArg $ TeXRaw p])
       (phone basics)
     <> document (TeXCommS "makecvtitle" <> mconcat (fmap mkSection sections))
