@@ -13,7 +13,7 @@ exampleInput =
 let types = (./dhall/types/package.dhall).mkTypes Text
 
 in  { basics =
-        { name = { firstName = "", lastName = "" }
+        { name = Some { firstName = "", lastName = "" }
         , email = ""
         , phone = Some ""
         , location =
@@ -119,7 +119,7 @@ exampleResume =
     <$> Resume
       { basics =
           Basics
-            { name = Name "" "",
+            { name = Just $ Name "" "",
               email = "",
               phone = Just "",
               location =

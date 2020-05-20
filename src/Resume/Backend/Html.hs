@@ -116,7 +116,7 @@ resumeHead :: Resume Text -> HtmlM ()
 resumeHead Resume {..} = do
   opts <- ask
   meta_ [httpEquiv_ "Content-Type", content_ "text/html; charset=utf-8"]
-  title_ $ toHtml $ let r = R.name basics in firstName r <> " " <> lastName r
+  maybe "Resume" (\Name {..} -> title_ . toHtml $ firstName <> " " <> lastName) (name basics)
   mconcat $
     ( \path ->
         link_ [rel_ "stylesheet", type_ "text/css", href_ path]
@@ -126,10 +126,7 @@ resumeHead Resume {..} = do
 
 resumeBody :: Resume Text -> HtmlM ()
 resumeBody Resume {..} = do
-  h1_
-    ( let r = R.name basics
-       in toHtml $ firstName r <> " " <> lastName r
-    )
+  foldMap (\Name {..} -> h1_ . toHtml $ firstName <> " " <> lastName) (R.name basics)
   foldMap (h2_ . toHtmlRaw) headline
   div_ [class_ "contact-info"]
     $ ul_

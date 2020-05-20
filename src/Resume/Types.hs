@@ -19,7 +19,7 @@ newtype Markdown = Markdown {unMarkdown :: Text} deriving (Eq, Show)
 
 data Basics
   = Basics
-      { name :: Name,
+      { name :: Maybe Name,
         email :: Text,
         location :: Location,
         phone :: Maybe Text

@@ -28,9 +28,10 @@ toLaTeX Resume {..} =
     <> TeXComm "moderncvstyle" [FixArg "casual"]
     <> TeXComm "moderncvcolor" [FixArg "blue"]
     <> maybe mempty (title . TeXRaw) headline
-    <> TeXComm
-      "name"
-      (fixArgs [firstName $ name basics, lastName $ name basics])
+    <> maybe
+      mempty
+      (\Name {..} -> TeXComm "name" (fixArgs [firstName, lastName]))
+      (name basics)
     <> TeXComm "email" [FixArg . TeXRaw $ email basics]
     <> maybe
       mempty
