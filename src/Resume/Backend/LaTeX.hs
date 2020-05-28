@@ -15,6 +15,7 @@ import Resume.Types as R
 import Text.LaTeX
 import Text.LaTeX.Base.Class
 import Text.LaTeX.Packages.BibLaTeX
+import Text.LaTeX.Packages.Geometry
 import Text.LaTeX.Packages.Inputenc
 import Text.Pandoc (PandocError)
 import qualified Text.Pandoc as P
@@ -38,7 +39,7 @@ type LaTeXReader = LaTeXT (Reader LaTeXOptions)
 resume :: Resume Text -> LaTeXReader ()
 resume Resume {..} = do
   documentclass [FontSize (Pt 11), Paper A4] "moderncv"
-  usepackage [raw "scale=0.8"] "geometry"
+  usepackage [raw "scale=0.8"] geometry
   usepackage [utf8] inputenc
   lift (asks bibFile)
     >>= foldMap
