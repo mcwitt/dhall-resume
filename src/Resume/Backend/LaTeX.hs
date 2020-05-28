@@ -6,126 +6,124 @@ module Resume.Backend.LaTeX
   )
 where
 
-import Control.Monad ((>=>))
+import Control.Monad.Reader
+import Data.Default
 import Data.Maybe
 import qualified Data.Text as T
 import Resume.Types as R
 import Text.LaTeX
-import Text.LaTeX.Base.Syntax
-import Text.Pandoc
+import Text.LaTeX.Base.Class
+import Text.Pandoc (PandocError)
+import qualified Text.Pandoc as P
+
+data LaTeXBackendOptions
+  = LaTeXBackendOptions
+
+instance Default LaTeXBackendOptions where
+  def = LaTeXBackendOptions
 
 -- | Render Resume with Markdown-formatted text as LaTeX
-renderText :: Resume Markdown -> Either PandocError Text
-renderText r = render . toLaTeX <$> traverse fromMarkdown r
+renderText :: LaTeXBackendOptions -> Resume Markdown -> Either PandocError Text
+renderText opts r =
+  render . flip runReader opts . execLaTeXT . resume <$> traverse fromMarkdown r
   where
-    fromMarkdown = runPure . (readMarkdown def >=> writeLaTeX def) . unMarkdown
+    fromMarkdown =
+      P.runPure . (P.readMarkdown def >=> P.writeLaTeX def) . unMarkdown
 
-toLaTeX :: Resume Text -> LaTeX
-toLaTeX Resume {..} =
+type LaTeXReader = LaTeXT (Reader LaTeXBackendOptions)
+
+resume :: Resume Text -> LaTeXReader ()
+resume Resume {..} = do
   documentclass [FontSize (Pt 11), Paper A4] "moderncv"
-    <> pandocHeader
-    <> usepackage [TeXRaw "scale=0.8"] "geometry"
-    <> TeXComm "moderncvstyle" [FixArg "casual"]
-    <> TeXComm "moderncvcolor" [FixArg "blue"]
-    <> foldMap (title . TeXRaw) headline
-    <> foldMap
-      (\Name {..} -> TeXComm "name" (fixArgs [firstName, lastName]))
-      (name basics)
-    <> TeXComm "email" [FixArg . TeXRaw $ email basics]
-    <> foldMap
-      (\R.Link {url = url} -> TeXComm "homepage" [FixArg $ TeXRaw url])
-      (homepage profiles)
-    <> foldMap (mkSocial "linkedin") (linkedin profiles)
-    <> foldMap (mkSocial "twitter") (twitter profiles)
-    <> foldMap (mkSocial "github") (github profiles)
-    <> case location basics of
-      StreetAddress {..} ->
-        TeXComm
-          "address"
-          ( fixArgs
-              [address, T.unwords [city, postalCode], fromMaybe "" country]
-          )
-      _ -> mempty
-    <> foldMap
-      (\p -> TeXComm "phone" [OptArg "mobile", FixArg $ TeXRaw p])
-      (phone basics)
-    <> document (TeXCommS "makecvtitle" <> mconcat (fmap mkSection sections))
+  pandocHeader
+  usepackage [raw "scale=0.8"] "geometry"
+  comm1 "moderncvstyle" "casual"
+  comm1 "moderncvcolor" "blue"
+  foldMap (title . raw) headline
+  foldMap
+    (\Name {..} -> comm2 "name" (raw firstName) (raw lastName))
+    (name basics)
+  comm1 "email" $ raw $ email basics
+  foldMap (\R.Link {url = url} -> comm1 "homepage" $ raw url) $
+    homepage profiles
+  foldMap (mkSocial "linkedin") $ linkedin profiles
+  foldMap (mkSocial "twitter") $ twitter profiles
+  foldMap (mkSocial "github") $ github profiles
+  case location basics of
+    StreetAddress {..} ->
+      comm3
+        "address"
+        (raw address)
+        (raw $ T.unwords [city, postalCode])
+        (raw $ fromMaybe "" country)
+    _ -> mempty
+  foldMap (\t -> optFixComm "phone" 1 ["mobile", raw t]) (phone basics)
+  document $ do
+    comm0 "makecvtitle"
+    mapM_ mkSection sections
 
-fixArgs :: [Text] -> [TeXArg]
-fixArgs = fmap $ FixArg . TeXRaw
+pandocHeader :: LaTeXReader ()
+pandocHeader = comm2 "providecommand" (comm0 "tightlist") $ do
+  comm2 "setlength" (commS "itemsep") "0pt"
+  comm2 "setlength" (commS "parskip") "0pt"
 
-pandocHeader :: LaTeX
-pandocHeader =
-  TeXComm
-    "providecommand"
-    [ FixArg $ TeXCommS "tightlist",
-      FixArg $ setlength "itemsep" "0pt" <> setlength "parskip" "0pt"
-    ]
-  where
-    setlength k v = TeXComm "setlength" [FixArg $ TeXCommS k, FixArg $ TeXRaw v]
+mkSocial :: Text -> Social -> LaTeXReader ()
+mkSocial service Social {..} = optFixComm "social" 1 [raw service, raw user]
 
-mkSocial :: Text -> Social -> LaTeX
-mkSocial service Social {..} =
-  TeXComm "social" [OptArg $ TeXRaw service, FixArg $ TeXRaw user]
+mkSection :: Section Text -> LaTeXReader ()
+mkSection Section {..} = do
+  section (raw heading)
+  case content of
+    Paragraph t -> raw t
+    Work xs -> mapM_ mkJob xs
+    Volunteering xs -> mapM_ mkVolunteer xs
+    Education xs -> mapM_ mkStudy xs
+    Skills xs -> mapM_ mkSkill xs
+    _ -> error "not implemented"
 
-mkSection :: Section Text -> LaTeX
-mkSection Section {..} = section (TeXRaw heading) <> case content of
-  Paragraph t -> TeXRaw t
-  Work xs -> mconcat $ fmap mkJob xs
-  Volunteering xs -> mconcat $ fmap mkVolunteer xs
-  Education xs -> mconcat $ fmap mkStudy xs
-  Skills xs -> mconcat $ fmap mkSkill xs
-  Publications _ -> error "not implemented"
-  Awards _ -> error "not implemented"
-  Languages _ -> error "not implemented"
-  Interests _ -> error "not implemented"
-
-mkJob :: Job Text -> LaTeX
+mkJob :: Job Text -> LaTeXReader ()
 mkJob Job {..} =
-  TeXComm "cventry" $
-    fixArgs
-      [ mkDateRange jobStartDate jobEndDate,
-        position,
-        company,
-        fromMaybe "" jobLocation,
-        "",
-        fromMaybe "" jobSummary
-      ]
+  comm6
+    "cventry"
+    (mkDateRange jobStartDate jobEndDate)
+    (raw position)
+    (raw company)
+    (foldMap raw jobLocation)
+    ""
+    (foldMap raw jobSummary)
 
-mkVolunteer :: Volunteer Text -> LaTeX
+mkVolunteer :: Volunteer Text -> LaTeXReader ()
 mkVolunteer Volunteer {..} =
-  TeXComm "cventry" $
-    fixArgs
-      [ mkDateRange volunteerStartDate volunteerEndDate,
-        volunteerPosition,
-        organization,
-        fromMaybe "" volunteerLocation,
-        "",
-        fromMaybe "" volunteerSummary
-      ]
+  comm6
+    "cventry"
+    (mkDateRange volunteerStartDate volunteerEndDate)
+    (raw volunteerPosition)
+    (raw organization)
+    (foldMap raw volunteerLocation)
+    ""
+    (foldMap raw volunteerSummary)
 
-mkStudy :: Study Text -> LaTeX
+mkStudy :: Study Text -> LaTeXReader ()
 mkStudy Study {..} =
-  TeXComm "cventry" $
-    fixArgs
-      [ mkDateRange studyStartDate studyEndDate,
-        studyType <> ", " <> area,
-        institution,
-        fromMaybe "" studyLocation,
-        fromMaybe "" gpa,
-        fromMaybe "" studySummary
-      ]
+  comm6
+    "cventry"
+    (mkDateRange studyStartDate studyEndDate)
+    (raw studyType)
+    (raw institution)
+    (foldMap raw studyLocation)
+    ""
+    (foldMap raw studySummary)
 
-mkDateRange :: Date -> Maybe Date -> Text
+mkDateRange :: LaTeXC l => Date -> Maybe Date -> l
 mkDateRange startDate =
-  maybe (mkDate startDate) (\m -> mkDate startDate <> "--" <> mkDate m)
+  maybe (mkDate startDate) (\d -> mkDate startDate <> "--" <> mkDate d)
 
-mkDate :: Date -> Text
+mkDate :: LaTeXC l => Date -> l
 mkDate Date {..} = fromString $ show month ++ "/" ++ show year
 
-mkSkill :: Skill Text -> LaTeX
+mkSkill :: Skill Text -> LaTeXReader ()
 mkSkill Skill {..} = case skillSummary of
-  Just summary -> TeXComm "cvitem" $ fixArgs [skillArea, summary]
+  Just summary -> comm2 "cvitem" (raw skillArea) (raw summary)
   Nothing ->
     error
       "Rendering skill keyword lists is not yet implemented. Please use 'skillSummary' instead."
