@@ -3,7 +3,8 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Resume.Backend.Html
-  ( renderHtml,
+  ( HtmlOptions (..),
+    renderHtml,
     renderHtmlBody,
     renderHtmlStyles,
     renderText,
@@ -26,15 +27,15 @@ import Resume.Types as R
 import Text.Pandoc (PandocError)
 import qualified Text.Pandoc as P
 
-data HtmlBackendOptions
-  = HtmlBackendOptions
+data HtmlOptions
+  = HtmlOptions
       { cssUrls :: [Text],
         style :: Maybe Css
       }
 
-instance Default HtmlBackendOptions where
+instance Default HtmlOptions where
   def =
-    HtmlBackendOptions
+    HtmlOptions
       { cssUrls =
           [ "https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css",
             "https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
@@ -70,7 +71,7 @@ defaultStyle =
 
 mkRender ::
   (Resume Text -> HtmlM ()) ->
-  HtmlBackendOptions ->
+  HtmlOptions ->
   Resume Markdown ->
   Either PandocError (Html ())
 mkRender part opts =
@@ -82,22 +83,22 @@ mkRender part opts =
     . traverse fromMarkdown
 
 renderHtml ::
-  HtmlBackendOptions ->
+  HtmlOptions ->
   Resume Markdown ->
   Either PandocError (Html ())
 renderHtml = mkRender resume
 
 renderHtmlBody ::
-  HtmlBackendOptions ->
+  HtmlOptions ->
   Resume Markdown ->
   Either PandocError (Html ())
 renderHtmlBody = mkRender resumeBody
 
-renderHtmlStyles :: HtmlBackendOptions -> Html ()
+renderHtmlStyles :: HtmlOptions -> Html ()
 renderHtmlStyles opts = flip runReader opts . commuteHtmlT $ resumeStyles
 
 renderText ::
-  HtmlBackendOptions ->
+  HtmlOptions ->
   Resume Markdown ->
   Either PandocError Text
 renderText opts = fmap (TL.toStrict . Lucid.renderText) . renderHtml opts
@@ -108,7 +109,7 @@ fromMarkdown =
     . (P.readMarkdown def >=> P.writeHtml5String def)
     . unMarkdown
 
-type HtmlM = HtmlT (Reader HtmlBackendOptions)
+type HtmlM = HtmlT (Reader HtmlOptions)
 
 resume :: Resume Text -> HtmlM ()
 resume r = html_ [lang_ "en"] $ do

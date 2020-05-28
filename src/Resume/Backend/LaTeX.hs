@@ -2,7 +2,8 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Resume.Backend.LaTeX
-  ( renderText,
+  ( LaTeXOptions (..),
+    renderText,
   )
 where
 
@@ -18,21 +19,21 @@ import Text.LaTeX.Packages.Inputenc
 import Text.Pandoc (PandocError)
 import qualified Text.Pandoc as P
 
-data LaTeXBackendOptions
-  = LaTeXBackendOptions {bibFile :: Maybe FilePath}
+data LaTeXOptions
+  = LaTeXOptions {bibFile :: Maybe FilePath}
 
-instance Default LaTeXBackendOptions where
-  def = LaTeXBackendOptions {bibFile = Nothing}
+instance Default LaTeXOptions where
+  def = LaTeXOptions {bibFile = Nothing}
 
 -- | Render Resume with Markdown-formatted text as LaTeX
-renderText :: LaTeXBackendOptions -> Resume Markdown -> Either PandocError Text
+renderText :: LaTeXOptions -> Resume Markdown -> Either PandocError Text
 renderText opts r =
   render . flip runReader opts . execLaTeXT . resume <$> traverse fromMarkdown r
   where
     fromMarkdown =
       P.runPure . (P.readMarkdown def >=> P.writeLaTeX def) . unMarkdown
 
-type LaTeXReader = LaTeXT (Reader LaTeXBackendOptions)
+type LaTeXReader = LaTeXT (Reader LaTeXOptions)
 
 resume :: Resume Text -> LaTeXReader ()
 resume Resume {..} = do

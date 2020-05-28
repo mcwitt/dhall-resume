@@ -2,7 +2,10 @@
 
 module Resume
   ( Backend (..),
+    HtmlOptions (..),
+    LaTeXOptions (..),
     compile,
+    def,
     defaultInputSettings,
     parseResume,
     readResume,
@@ -17,9 +20,8 @@ import Resume.Backend.LaTeX
 import Resume.Types
 
 data Backend
-  = LaTeX
-  | Html
-  deriving (Eq, Show)
+  = LaTeX LaTeXOptions
+  | Html HtmlOptions
 
 parseResume :: InputSettings -> Text -> IO (Resume Markdown)
 parseResume settings inp =
@@ -35,8 +37,8 @@ compile :: Backend -> FilePath -> IO Text
 compile backend path = do
   r <- readResume defaultInputSettings path
   let compiler = case backend of
-        LaTeX -> Resume.Backend.LaTeX.renderText def
-        Html -> Resume.Backend.Html.renderText def
+        LaTeX opts -> Resume.Backend.LaTeX.renderText opts
+        Html opts -> Resume.Backend.Html.renderText opts
   case compiler r of
     Right t -> return t
     Left e -> error $ "Pandoc error: " <> show e
