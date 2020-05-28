@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -14,7 +15,6 @@ import qualified Data.Text as T
 import Resume.Types as R
 import Text.LaTeX
 import Text.LaTeX.Base.Class
-import Text.LaTeX.Packages.BibLaTeX
 import Text.LaTeX.Packages.Geometry
 import Text.LaTeX.Packages.Inputenc
 import Text.Pandoc (PandocError)
@@ -41,12 +41,6 @@ resume Resume {..} = do
   documentclass [FontSize (Pt 11), Paper A4] "moderncv"
   usepackage [raw "scale=0.8"] geometry
   usepackage [utf8] inputenc
-  lift (asks bibFile)
-    >>= foldMap
-      ( \f -> do
-          usepackage ["backend=biber", "sorting=ydnt"] biblatex
-          addbibresource f
-      )
   pandocHeader
   comm1 "moderncvstyle" "casual"
   comm1 "moderncvcolor" "blue"
@@ -90,10 +84,12 @@ mkSection Section {..} = do
     Volunteering xs -> mapM_ mkVolunteer xs
     Education xs -> mapM_ mkStudy xs
     Skills xs -> mapM_ mkSkill xs
-    BibTeXPublications xs -> lift (asks bibFile) >>= \bibFile ->
-      when (isJust bibFile) $ do
+    BibTeXPublications xs -> lift (asks bibFile) >>= \case
+      Just bibFile -> do
         mapM_ (comm1 "nocite" . raw) xs
-        optFixComm "printbibliography" 1 [raw "heading=none"]
+        comm1 "bibliographystyle" "plain"
+        comm1 "bibliography" (fromString bibFile)
+      Nothing -> mempty
     _ -> error "not implemented"
 
 mkJob :: Job Text -> LaTeXReader ()
