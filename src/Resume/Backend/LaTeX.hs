@@ -43,7 +43,7 @@ resume Resume {..} = do
   lift (asks bibFile)
     >>= foldMap
       ( \f -> do
-          usepackage ["backend=biber"] biblatex
+          usepackage ["backend=biber", "sorting=ydnt"] biblatex
           addbibresource f
       )
   pandocHeader
