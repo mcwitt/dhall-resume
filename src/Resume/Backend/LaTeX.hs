@@ -21,10 +21,21 @@ import Text.Pandoc (PandocError)
 import qualified Text.Pandoc as P
 
 data LaTeXOptions
-  = LaTeXOptions {bibFile :: Maybe FilePath}
+  = LaTeXOptions
+      { modernCvColor :: Text,
+        modernCvStyle :: Text,
+        bibFile :: Maybe FilePath,
+        hintsColumnWidth :: Maybe Text
+      }
 
 instance Default LaTeXOptions where
-  def = LaTeXOptions {bibFile = Nothing}
+  def =
+    LaTeXOptions
+      { modernCvColor = "blue",
+        modernCvStyle = "casual",
+        bibFile = Nothing,
+        hintsColumnWidth = Nothing
+      }
 
 -- | Render Resume with Markdown-formatted text as LaTeX
 renderText :: LaTeXOptions -> Resume Markdown -> Either PandocError Text
@@ -42,8 +53,9 @@ resume Resume {..} = do
   usepackage [raw "scale=0.8"] geometry
   usepackage [utf8] inputenc
   pandocHeader
-  comm1 "moderncvstyle" "casual"
-  comm1 "moderncvcolor" "blue"
+  lift (asks modernCvStyle) >>= comm1 "moderncvstyle" . raw
+  lift (asks modernCvColor) >>= comm1 "moderncvcolor" . raw
+  lift (asks hintsColumnWidth) >>= foldMap (comm2 "setlength" (commS "hintscolumnwidth") . raw)
   foldMap (title . raw) headline
   foldMap
     (\Name {..} -> comm2 "name" (raw firstName) (raw lastName))
@@ -119,7 +131,7 @@ mkStudy Study {..} =
   comm6
     "cventry"
     (mkDateRange studyStartDate studyEndDate)
-    (raw studyType)
+    (raw (studyType <> ", " <> area))
     (raw institution)
     (foldMap raw studyLocation)
     ""

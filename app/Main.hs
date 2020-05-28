@@ -37,13 +37,30 @@ latex = flag' LaTeX (long "latex") <*> latexOptions
 latexOptions :: Parser LaTeXOptions
 latexOptions =
   LaTeXOptions
-    <$> optional
-      ( strOption
-          ( long "bibfile"
-              <> metavar "FILENAME"
-              <> help "BibTeX file containing publications"
-          )
+    <$> strOption
+      ( long "color"
+          <> metavar "COLOR"
+          <> help "moderncv color theme (black, blue, burgundy, green, etc.)"
       )
+      <*> strOption
+        ( long "style"
+            <> metavar "NAME"
+            <> help "moderncv style (classic, banking, oldstyle, fancy)"
+        )
+      <*> optional
+        ( strOption
+            ( long "bibfile"
+                <> metavar "FILENAME"
+                <> help "BibTeX file containing publications"
+            )
+        )
+      <*> optional
+        ( strOption
+            ( long "hints-column-width"
+                <> metavar "WIDTH"
+                <> help "width of the left column, e.g. 3cm"
+            )
+        )
 
 html :: Parser Backend
 html = flag' Html (long "html") <*> pure def
