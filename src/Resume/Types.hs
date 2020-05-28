@@ -98,7 +98,7 @@ data Resume a
 
 data Section a
   = Section
-      { heading :: a,
+      { heading :: Maybe a,
         content :: SectionContent a
       }
   deriving (Functor, Foldable, Traversable, Generic, Eq, Show)

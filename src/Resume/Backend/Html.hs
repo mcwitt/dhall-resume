@@ -186,7 +186,7 @@ entry left right = div_ [class_ "resume-entry"] $ do
 
 section :: ToHtml a => Section a -> HtmlM ()
 section Section {..} = do
-  h2_ $ toHtml heading
+  foldMap (h2_ . toHtml) heading
   sectionContent content
 
 sectionContent :: ToHtml a => SectionContent a -> HtmlM ()

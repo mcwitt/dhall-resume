@@ -1,1 +1,1 @@
-λ(a : Type) → { heading : Text, content : ./SectionContent.dhall a }
+λ(a : Type) → { heading : Optional Text, content : ./SectionContent.dhall a }
