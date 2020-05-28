@@ -102,6 +102,10 @@ in  { basics =
         }
       , { heading = ""
         , content =
+            types.SectionContent.BibTeXPublications [""]
+        }
+      , { heading = ""
+        , content =
             types.SectionContent.Interests
               [ { interest = "", keywords = [ "" ] } ]
         }
@@ -217,6 +221,10 @@ exampleResume =
                           publicationSummary = Just ""
                         }
                     ]
+              },
+            Section
+              { heading = "",
+                content = BibTeXPublications [""]
               },
             Section
               { heading = "",

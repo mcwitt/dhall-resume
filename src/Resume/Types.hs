@@ -17,6 +17,8 @@ import Dhall
 -- | Used to wrap text that should be interpreted as Markdown
 newtype Markdown = Markdown {unMarkdown :: Text} deriving (Eq, Show)
 
+type CitationKey = Text
+
 data Basics
   = Basics
       { name :: Maybe Name,
@@ -109,6 +111,7 @@ data SectionContent a
   | Education [Study a]
   | Awards [Award a]
   | Publications [Publication a]
+  | BibTeXPublications [CitationKey]
   | Languages [Language]
   | Interests [Interest a]
   deriving (Functor, Foldable, Traversable, Generic, Eq, Show)

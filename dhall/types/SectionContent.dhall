@@ -6,6 +6,7 @@
   | Education : List (./Study.dhall a)
   | Awards : List (./Award.dhall a)
   | Publications : List (./Publication.dhall a)
+  | BibTeXPublications : List Text
   | Languages : List ./Language.dhall
   | Interests : List (./Interest.dhall a)
   >

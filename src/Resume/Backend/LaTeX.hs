@@ -13,14 +13,16 @@ import qualified Data.Text as T
 import Resume.Types as R
 import Text.LaTeX
 import Text.LaTeX.Base.Class
+import Text.LaTeX.Packages.BibLaTeX
+import Text.LaTeX.Packages.Inputenc
 import Text.Pandoc (PandocError)
 import qualified Text.Pandoc as P
 
 data LaTeXBackendOptions
-  = LaTeXBackendOptions
+  = LaTeXBackendOptions {bibFile :: Maybe FilePath}
 
 instance Default LaTeXBackendOptions where
-  def = LaTeXBackendOptions
+  def = LaTeXBackendOptions {bibFile = Nothing}
 
 -- | Render Resume with Markdown-formatted text as LaTeX
 renderText :: LaTeXBackendOptions -> Resume Markdown -> Either PandocError Text
@@ -35,8 +37,15 @@ type LaTeXReader = LaTeXT (Reader LaTeXBackendOptions)
 resume :: Resume Text -> LaTeXReader ()
 resume Resume {..} = do
   documentclass [FontSize (Pt 11), Paper A4] "moderncv"
-  pandocHeader
   usepackage [raw "scale=0.8"] "geometry"
+  usepackage [utf8] inputenc
+  lift (asks bibFile)
+    >>= foldMap
+      ( \f -> do
+          usepackage ["backend=biber"] biblatex
+          addbibresource f
+      )
+  pandocHeader
   comm1 "moderncvstyle" "casual"
   comm1 "moderncvcolor" "blue"
   foldMap (title . raw) headline
@@ -79,6 +88,10 @@ mkSection Section {..} = do
     Volunteering xs -> mapM_ mkVolunteer xs
     Education xs -> mapM_ mkStudy xs
     Skills xs -> mapM_ mkSkill xs
+    BibTeXPublications xs -> lift (asks bibFile) >>= \bibFile ->
+      when (isJust bibFile) $ do
+        mapM_ (comm1 "nocite" . raw) xs
+        optFixComm "printbibliography" 1 [raw "heading=none"]
     _ -> error "not implemented"
 
 mkJob :: Job Text -> LaTeXReader ()
