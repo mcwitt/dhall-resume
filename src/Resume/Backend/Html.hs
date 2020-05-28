@@ -191,15 +191,10 @@ section Section {..} = do
 
 sectionContent :: ToHtml a => SectionContent a -> HtmlM ()
 sectionContent = \case
-  Paragraph _ -> error "not implemented"
   Work xs -> mconcat $ fmap job xs
-  Volunteering _ -> error "not implemented"
   Skills xs -> mconcat $ fmap skill xs
   Education xs -> mconcat $ fmap study xs
-  Awards _ -> error "not implemented"
-  Publications _ -> error "not implemented"
-  Languages _ -> error "not implemented"
-  Interests _ -> error "not implemented"
+  _ -> error "not implemented"
 
 date :: Date -> HtmlM ()
 date Date {..} = toHtml (show month <> "/" <> show year)
