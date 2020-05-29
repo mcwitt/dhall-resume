@@ -101,6 +101,10 @@ data Section a
       { heading :: a,
         content :: SectionContent a
       }
+  | BibTeXPublications
+      { pubsHeading :: a,
+        citeKeys :: [Text]
+      }
   deriving (Functor, Foldable, Traversable, Generic, Eq, Show)
 
 data SectionContent a
@@ -111,7 +115,6 @@ data SectionContent a
   | Education [Study a]
   | Awards [Award a]
   | Publications [Publication a]
-  | BibTeXPublications [CitationKey]
   | Languages [Language]
   | Interests [Interest a]
   deriving (Functor, Foldable, Traversable, Generic, Eq, Show)

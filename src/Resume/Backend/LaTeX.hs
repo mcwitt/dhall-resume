@@ -96,13 +96,14 @@ mkSection Section {..} = do
     Volunteering xs -> mapM_ mkVolunteer xs
     Education xs -> mapM_ mkStudy xs
     Skills xs -> mapM_ mkSkill xs
-    BibTeXPublications xs -> lift (asks bibFile) >>= \case
-      Just bibFile -> do
-        mapM_ (comm1 "nocite" . raw) xs
-        comm1 "bibliographystyle" "plain"
-        comm1 "bibliography" (fromString bibFile)
-      Nothing -> mempty
     _ -> error "not implemented"
+mkSection BibTeXPublications {..} = lift (asks bibFile) >>= \case
+  Just bibFile -> do
+    comm2 "renewcommand" (commS "refname") (raw pubsHeading)
+    mapM_ (comm1 "nocite" . raw) citeKeys
+    comm1 "bibliographystyle" "plain"
+    comm1 "bibliography" (fromString bibFile)
+  Nothing -> mempty
 
 mkJob :: Job Text -> LaTeXReader ()
 mkJob Job {..} =

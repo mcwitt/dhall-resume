@@ -188,6 +188,7 @@ section :: ToHtml a => Section a -> HtmlM ()
 section Section {..} = do
   h2_ $ toHtml heading
   sectionContent content
+section BibTeXPublications {..} = error "not implemented"
 
 sectionContent :: ToHtml a => SectionContent a -> HtmlM ()
 sectionContent = \case

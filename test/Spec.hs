@@ -28,91 +28,96 @@ in  { basics =
         }
     , headline = Some ""
     , sections =
-      [ { heading = ""
-        , content =
-            types.SectionContent.Work
-              [ { position = ""
-                , company = ""
-                , jobStartDate = { year = 1, month = 1 }
-                , jobEndDate = Some { year = 1, month = 1 }
-                , jobLocation = Some ""
-                , companyUrl = Some ""
-                , jobSummary = Some ""
-                }
-              ]
-        }
-      , { heading = ""
-        , content =
-            types.SectionContent.Volunteering
-              [ { volunteerPosition = ""
-                , organization = ""
-                , volunteerStartDate = { year = 1, month = 1 }
-                , volunteerEndDate = Some { year = 1, month = 1 }
-                , volunteerLocation = Some ""
-                , organizationUrl = Some ""
-                , volunteerSummary = Some ""
-                }
-              ]
-        }
-      , { heading = ""
-        , content =
-            types.SectionContent.Skills
-              [ { skillArea = ""
-                , skillKeywords = [ "" ]
-                , skillSummary = Some ""
-                }
-              ]
-        }
-      , { heading = ""
-        , content =
-            types.SectionContent.Education
-              [ { studyType = ""
-                , area = ""
-                , institution = ""
-                , studyStartDate = { year = 1, month = 1 }
-                , studyEndDate = Some { year = 1, month = 1 }
-                , studyLocation = Some ""
-                , institutionUrl = Some ""
-                , gpa = Some ""
-                , courses = [ "" ]
-                , studySummary = Some ""
-                }
-              ]
-        }
-      , { heading = ""
-        , content =
-            types.SectionContent.Awards
-              [ { awardTitle = ""
-                , awardDate = { year = 1, month = 1 }
-                , awarder = ""
-                , awardSummary = Some ""
-                }
-              ]
-        }
-      , { heading = ""
-        , content =
-            types.SectionContent.Publications
-              [ { publicationTitle = ""
-                , publisher = ""
-                , publicationDate = { year = 1, month = 1 }
-                , publicationUrl = Some ""
-                , publicationSummary = Some ""
-                }
-              ]
-        }
-      , { heading = ""
-        , content =
-            types.SectionContent.BibTeXPublications [""]
-        }
-      , { heading = ""
-        , content =
-            types.SectionContent.Interests
-              [ { interest = "", keywords = [ "" ] } ]
-        }
-      , { heading = ""
-        , content =
-            types.SectionContent.Languages [ { language = "", fluency = "" } ]
-        }
+      [ types.Section.Section
+          { heading = ""
+          , content =
+              types.SectionContent.Work
+                [ { position = ""
+                  , company = ""
+                  , jobStartDate = { year = 1, month = 1 }
+                  , jobEndDate = Some { year = 1, month = 1 }
+                  , jobLocation = Some ""
+                  , companyUrl = Some ""
+                  , jobSummary = Some ""
+                  }
+                ]
+          }
+      , types.Section.Section
+          { heading = ""
+          , content =
+              types.SectionContent.Volunteering
+                [ { volunteerPosition = ""
+                  , organization = ""
+                  , volunteerStartDate = { year = 1, month = 1 }
+                  , volunteerEndDate = Some { year = 1, month = 1 }
+                  , volunteerLocation = Some ""
+                  , organizationUrl = Some ""
+                  , volunteerSummary = Some ""
+                  }
+                ]
+          }
+      , types.Section.Section
+          { heading = ""
+          , content =
+              types.SectionContent.Skills
+                [ { skillArea = ""
+                  , skillKeywords = [ "" ]
+                  , skillSummary = Some ""
+                  }
+                ]
+          }
+      , types.Section.Section
+          { heading = ""
+          , content =
+              types.SectionContent.Education
+                [ { studyType = ""
+                  , area = ""
+                  , institution = ""
+                  , studyStartDate = { year = 1, month = 1 }
+                  , studyEndDate = Some { year = 1, month = 1 }
+                  , studyLocation = Some ""
+                  , institutionUrl = Some ""
+                  , gpa = Some ""
+                  , courses = [ "" ]
+                  , studySummary = Some ""
+                  }
+                ]
+          }
+      , types.Section.Section
+          { heading = ""
+          , content =
+              types.SectionContent.Awards
+                [ { awardTitle = ""
+                  , awardDate = { year = 1, month = 1 }
+                  , awarder = ""
+                  , awardSummary = Some ""
+                  }
+                ]
+          }
+      , types.Section.Section
+          { heading = ""
+          , content =
+              types.SectionContent.Interests
+                [ { interest = "", keywords = [ "" ] } ]
+          }
+      , types.Section.Section
+          { heading = ""
+          , content =
+              types.SectionContent.Languages [ { language = "", fluency = "" } ]
+          }
+      , types.Section.Section
+          { heading = ""
+          , content =
+              types.SectionContent.Publications
+                [ { publicationTitle = ""
+                  , publisher = ""
+                  , publicationDate = { year = 1, month = 1 }
+                  , publicationUrl = Some ""
+                  , publicationSummary = Some ""
+                  }
+                ]
+          }
+      , types.Section.BibTeXPublications { pubsHeading = "", citeKeys = [ "" ] }
       ]
     }
 |]
@@ -211,6 +216,14 @@ exampleResume =
               },
             Section
               { heading = "",
+                content = Interests [Interest {interest = "", keywords = [""]}]
+              },
+            Section
+              { heading = "",
+                content = Languages [Language {language = "", fluency = ""}]
+              },
+            Section
+              { heading = "",
                 content =
                   Publications
                     [ Publication
@@ -222,18 +235,7 @@ exampleResume =
                         }
                     ]
               },
-            Section
-              { heading = "",
-                content = BibTeXPublications [""]
-              },
-            Section
-              { heading = "",
-                content = Interests [Interest {interest = "", keywords = [""]}]
-              },
-            Section
-              { heading = "",
-                content = Languages [Language {language = "", fluency = ""}]
-              }
+            BibTeXPublications {pubsHeading = "", citeKeys = [""]}
           ]
       }
 
