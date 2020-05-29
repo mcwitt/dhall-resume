@@ -28,7 +28,7 @@ in  { basics =
         }
     , headline = Some ""
     , sections =
-      [ { heading = Some ""
+      [ { heading = ""
         , content =
             types.SectionContent.Work
               [ { position = ""
@@ -41,7 +41,7 @@ in  { basics =
                 }
               ]
         }
-      , { heading = Some ""
+      , { heading = ""
         , content =
             types.SectionContent.Volunteering
               [ { volunteerPosition = ""
@@ -54,7 +54,7 @@ in  { basics =
                 }
               ]
         }
-      , { heading = Some ""
+      , { heading = ""
         , content =
             types.SectionContent.Skills
               [ { skillArea = ""
@@ -63,7 +63,7 @@ in  { basics =
                 }
               ]
         }
-      , { heading = Some ""
+      , { heading = ""
         , content =
             types.SectionContent.Education
               [ { studyType = ""
@@ -79,7 +79,7 @@ in  { basics =
                 }
               ]
         }
-      , { heading = Some ""
+      , { heading = ""
         , content =
             types.SectionContent.Awards
               [ { awardTitle = ""
@@ -89,7 +89,7 @@ in  { basics =
                 }
               ]
         }
-      , { heading = Some ""
+      , { heading = ""
         , content =
             types.SectionContent.Publications
               [ { publicationTitle = ""
@@ -100,16 +100,16 @@ in  { basics =
                 }
               ]
         }
-      , { heading = Some ""
+      , { heading = ""
         , content =
             types.SectionContent.BibTeXPublications [""]
         }
-      , { heading = Some ""
+      , { heading = ""
         , content =
             types.SectionContent.Interests
               [ { interest = "", keywords = [ "" ] } ]
         }
-      , { heading = Some ""
+      , { heading = ""
         , content =
             types.SectionContent.Languages [ { language = "", fluency = "" } ]
         }
@@ -144,7 +144,7 @@ exampleResume =
         headline = Just "",
         sections =
           [ Section
-              { heading = Just "",
+              { heading = "",
                 content =
                   Work
                     [ Job
@@ -159,7 +159,7 @@ exampleResume =
                     ]
               },
             Section
-              { heading = Just "",
+              { heading = "",
                 content =
                   Volunteering
                     [ Volunteer
@@ -174,13 +174,13 @@ exampleResume =
                     ]
               },
             Section
-              { heading = Just "",
+              { heading = "",
                 content =
                   Skills
                     [Skill {skillArea = "", skillKeywords = [""], skillSummary = Just ""}]
               },
             Section
-              { heading = Just "",
+              { heading = "",
                 content =
                   Education
                     [ Study
@@ -198,7 +198,7 @@ exampleResume =
                     ]
               },
             Section
-              { heading = Just "",
+              { heading = "",
                 content =
                   Awards
                     [ Award
@@ -210,7 +210,7 @@ exampleResume =
                     ]
               },
             Section
-              { heading = Just "",
+              { heading = "",
                 content =
                   Publications
                     [ Publication
@@ -223,15 +223,15 @@ exampleResume =
                     ]
               },
             Section
-              { heading = Just "",
+              { heading = "",
                 content = BibTeXPublications [""]
               },
             Section
-              { heading = Just "",
+              { heading = "",
                 content = Interests [Interest {interest = "", keywords = [""]}]
               },
             Section
-              { heading = Just "",
+              { heading = "",
                 content = Languages [Language {language = "", fluency = ""}]
               }
           ]

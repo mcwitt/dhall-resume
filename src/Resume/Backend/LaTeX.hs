@@ -89,7 +89,7 @@ mkSocial service Social {..} = optFixComm "social" 1 [raw service, raw user]
 
 mkSection :: Section Text -> LaTeXReader ()
 mkSection Section {..} = do
-  foldMap (section . raw) heading
+  section (raw heading)
   case content of
     Paragraph t -> raw t
     Work xs -> mapM_ mkJob xs
