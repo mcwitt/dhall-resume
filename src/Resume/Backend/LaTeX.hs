@@ -73,7 +73,7 @@ resume Resume {..} = do
         (raw address)
         (raw $ T.unwords [city, postalCode])
         (raw $ fromMaybe "" country)
-    _ -> mempty
+    Region region -> comm1 "address" (raw region)
   foldMap (\t -> optFixComm "phone" 1 ["mobile", raw t]) (phone basics)
   document $ do
     comm0 "makecvtitle"
