@@ -8,7 +8,7 @@ module Resume
     def,
     defaultInputSettings,
     parseResume,
-    readResume,
+    toPandoc,
     rootDirectory,
   )
 where
@@ -18,21 +18,30 @@ import Dhall
 import Resume.Backend.Html
 import Resume.Backend.LaTeX
 import Resume.Types
+import Text.Pandoc (Pandoc, PandocError)
+import qualified Text.Pandoc as P
 
 data Backend
   = LaTeX LaTeXOptions
   | Html HtmlOptions
 
-parseResume :: InputSettings -> Text -> IO (Resume Markdown)
-parseResume settings inp =
-  fmap Markdown
-    <$> inputWithSettings settings auto inp
+-- | Deserialize dhall input
+parseResume :: InputSettings -> Text -> IO (Resume Text)
+parseResume settings = inputWithSettings settings auto
 
-readResume :: InputSettings -> FilePath -> IO (Resume Markdown)
-readResume settings path = TIO.readFile path >>= parseResume settings
+-- | Parse resume text fields as Pandoc Markdown
+toPandoc :: Resume Text -> Either PandocError (Resume Pandoc)
+toPandoc = P.runPure . traverse (P.readMarkdown def)
 
--- | Compile resume using selected backend.
--- Interprets text fields as Markdown.
+readResume :: InputSettings -> FilePath -> IO (Resume Pandoc)
+readResume settings path = do
+  raw <- TIO.readFile path
+  text <- parseResume settings raw
+  case toPandoc text of
+    Right res -> return res
+    Left err -> fail $ "Error parsing Pandoc Markdown: " ++ show err
+
+-- | Generate resume from dhall file using the specified backend
 compile :: Backend -> FilePath -> IO Text
 compile backend path = do
   r <- readResume defaultInputSettings path
@@ -41,4 +50,4 @@ compile backend path = do
         Html opts -> Resume.Backend.Html.renderText opts
   case compiler r of
     Right t -> return t
-    Left e -> error $ "Pandoc error: " <> show e
+    Left e -> error $ "Rendering error: " <> show e

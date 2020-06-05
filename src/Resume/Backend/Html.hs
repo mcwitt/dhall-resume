@@ -24,7 +24,7 @@ import Lucid hiding (renderText)
 import qualified Lucid
 import Lucid.Base (commuteHtmlT)
 import Resume.Types as R
-import Text.Pandoc (PandocError)
+import Text.Pandoc (Pandoc, PandocError)
 import qualified Text.Pandoc as P
 
 data HtmlOptions
@@ -72,7 +72,7 @@ defaultStyle =
 mkRender ::
   (Resume Text -> HtmlM ()) ->
   HtmlOptions ->
-  Resume Markdown ->
+  Resume Pandoc ->
   Either PandocError (Html ())
 mkRender part opts =
   fmap
@@ -80,17 +80,17 @@ mkRender part opts =
         . commuteHtmlT
         . part
     )
-    . traverse fromMarkdown
+    . traverse (P.runPure . P.writeHtml5String def)
 
 renderHtml ::
   HtmlOptions ->
-  Resume Markdown ->
+  Resume Pandoc ->
   Either PandocError (Html ())
 renderHtml = mkRender resume
 
 renderHtmlBody ::
   HtmlOptions ->
-  Resume Markdown ->
+  Resume Pandoc ->
   Either PandocError (Html ())
 renderHtmlBody = mkRender resumeBody
 
@@ -99,15 +99,9 @@ renderHtmlStyles opts = flip runReader opts . commuteHtmlT $ resumeStyles
 
 renderText ::
   HtmlOptions ->
-  Resume Markdown ->
+  Resume Pandoc ->
   Either PandocError Text
 renderText opts = fmap (TL.toStrict . Lucid.renderText) . renderHtml opts
-
-fromMarkdown :: Markdown -> Either PandocError Text
-fromMarkdown =
-  P.runPure
-    . (P.readMarkdown def >=> P.writeHtml5String def)
-    . unMarkdown
 
 type HtmlM = HtmlT (Reader HtmlOptions)
 

@@ -122,122 +122,121 @@ in  { basics =
     }
 |]
 
-exampleResume :: Resume Markdown
+exampleResume :: Resume Text
 exampleResume =
-  Markdown
-    <$> Resume
-      { basics =
-          Basics
-            { name = Just $ Name "" "",
-              email = "",
-              phone = Just "",
-              location =
-                StreetAddress
-                  { city = "",
-                    address = "",
-                    postalCode = "",
-                    country = Just ""
-                  }
+  Resume
+    { basics =
+        Basics
+          { name = Just $ Name "" "",
+            email = "",
+            phone = Just "",
+            location =
+              StreetAddress
+                { city = "",
+                  address = "",
+                  postalCode = "",
+                  country = Just ""
+                }
+          },
+      profiles =
+        Profiles
+          { homepage = Just $ Link "" $ Just "",
+            linkedin = Just $ Social "" $ Just "",
+            github = Just $ Social "" $ Just "",
+            twitter = Just $ Social "" $ Just ""
+          },
+      headline = Just "",
+      sections =
+        [ Section
+            { heading = "",
+              content =
+                Work
+                  [ Job
+                      { position = "",
+                        company = "",
+                        jobStartDate = Date 1 1,
+                        jobEndDate = Just $ Date 1 1,
+                        jobLocation = Just "",
+                        companyUrl = Just "",
+                        jobSummary = Just ""
+                      }
+                  ]
             },
-        profiles =
-          Profiles
-            { homepage = Just $ Link "" $ Just "",
-              linkedin = Just $ Social "" $ Just "",
-              github = Just $ Social "" $ Just "",
-              twitter = Just $ Social "" $ Just ""
+          Section
+            { heading = "",
+              content =
+                Volunteering
+                  [ Volunteer
+                      { volunteerPosition = "",
+                        organization = "",
+                        volunteerStartDate = Date 1 1,
+                        volunteerEndDate = Just $ Date 1 1,
+                        volunteerLocation = Just "",
+                        organizationUrl = Just "",
+                        volunteerSummary = Just ""
+                      }
+                  ]
             },
-        headline = Just "",
-        sections =
-          [ Section
-              { heading = "",
-                content =
-                  Work
-                    [ Job
-                        { position = "",
-                          company = "",
-                          jobStartDate = Date 1 1,
-                          jobEndDate = Just $ Date 1 1,
-                          jobLocation = Just "",
-                          companyUrl = Just "",
-                          jobSummary = Just ""
-                        }
-                    ]
-              },
-            Section
-              { heading = "",
-                content =
-                  Volunteering
-                    [ Volunteer
-                        { volunteerPosition = "",
-                          organization = "",
-                          volunteerStartDate = Date 1 1,
-                          volunteerEndDate = Just $ Date 1 1,
-                          volunteerLocation = Just "",
-                          organizationUrl = Just "",
-                          volunteerSummary = Just ""
-                        }
-                    ]
-              },
-            Section
-              { heading = "",
-                content =
-                  Skills
-                    [Skill {skillArea = "", skillKeywords = [""], skillSummary = Just ""}]
-              },
-            Section
-              { heading = "",
-                content =
-                  Education
-                    [ Study
-                        { studyType = "",
-                          area = "",
-                          institution = "",
-                          studyStartDate = Date 1 1,
-                          studyEndDate = Just $ Date 1 1,
-                          studyLocation = Just "",
-                          institutionUrl = Just "",
-                          gpa = Just "",
-                          courses = [""],
-                          studySummary = Just ""
-                        }
-                    ]
-              },
-            Section
-              { heading = "",
-                content =
-                  Awards
-                    [ Award
-                        { awardTitle = "",
-                          awardDate = Date 1 1,
-                          awarder = "",
-                          awardSummary = Just ""
-                        }
-                    ]
-              },
-            Section
-              { heading = "",
-                content = Interests [Interest {interest = "", keywords = [""]}]
-              },
-            Section
-              { heading = "",
-                content = Languages [Language {language = "", fluency = ""}]
-              },
-            Section
-              { heading = "",
-                content =
-                  Publications
-                    [ Publication
-                        { publicationTitle = "",
-                          publisher = "",
-                          publicationDate = Date 1 1,
-                          publicationUrl = Just "",
-                          publicationSummary = Just ""
-                        }
-                    ]
-              },
-            BibTeXPublications {pubsHeading = "", citeKeys = [""]}
-          ]
-      }
+          Section
+            { heading = "",
+              content =
+                Skills
+                  [Skill {skillArea = "", skillKeywords = [""], skillSummary = Just ""}]
+            },
+          Section
+            { heading = "",
+              content =
+                Education
+                  [ Study
+                      { studyType = "",
+                        area = "",
+                        institution = "",
+                        studyStartDate = Date 1 1,
+                        studyEndDate = Just $ Date 1 1,
+                        studyLocation = Just "",
+                        institutionUrl = Just "",
+                        gpa = Just "",
+                        courses = [""],
+                        studySummary = Just ""
+                      }
+                  ]
+            },
+          Section
+            { heading = "",
+              content =
+                Awards
+                  [ Award
+                      { awardTitle = "",
+                        awardDate = Date 1 1,
+                        awarder = "",
+                        awardSummary = Just ""
+                      }
+                  ]
+            },
+          Section
+            { heading = "",
+              content = Interests [Interest {interest = "", keywords = [""]}]
+            },
+          Section
+            { heading = "",
+              content = Languages [Language {language = "", fluency = ""}]
+            },
+          Section
+            { heading = "",
+              content =
+                Publications
+                  [ Publication
+                      { publicationTitle = "",
+                        publisher = "",
+                        publicationDate = Date 1 1,
+                        publicationUrl = Just "",
+                        publicationSummary = Just ""
+                      }
+                  ]
+            },
+          BibTeXPublications {pubsHeading = "", citeKeys = [""]}
+        ]
+    }
 
 main :: IO ()
 main = hspec $ do

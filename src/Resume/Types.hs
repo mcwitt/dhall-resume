@@ -14,9 +14,6 @@ module Resume.Types where
 import Data.Text
 import Dhall
 
--- | Used to wrap text that should be interpreted as Markdown
-newtype Markdown = Markdown {unMarkdown :: Text} deriving (Eq, Show)
-
 type CitationKey = Text
 
 data Basics

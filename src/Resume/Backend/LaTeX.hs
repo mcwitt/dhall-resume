@@ -17,7 +17,7 @@ import Text.LaTeX
 import Text.LaTeX.Base.Class
 import Text.LaTeX.Packages.Geometry
 import Text.LaTeX.Packages.Inputenc
-import Text.Pandoc (PandocError)
+import Text.Pandoc (Pandoc, PandocError)
 import qualified Text.Pandoc as P
 
 data LaTeXOptions
@@ -38,12 +38,10 @@ instance Default LaTeXOptions where
       }
 
 -- | Render Resume with Markdown-formatted text as LaTeX
-renderText :: LaTeXOptions -> Resume Markdown -> Either PandocError Text
-renderText opts r =
-  render . flip runReader opts . execLaTeXT . resume <$> traverse fromMarkdown r
-  where
-    fromMarkdown =
-      P.runPure . (P.readMarkdown def >=> P.writeLaTeX def) . unMarkdown
+renderText :: LaTeXOptions -> Resume Pandoc -> Either PandocError Text
+renderText opts =
+  fmap (render . flip runReader opts . execLaTeXT . resume)
+    . traverse (P.runPure . P.writeLaTeX def)
 
 type LaTeXReader = LaTeXT (Reader LaTeXOptions)
 
@@ -80,9 +78,10 @@ resume Resume {..} = do
     mapM_ mkSection sections
 
 pandocHeader :: LaTeXReader ()
-pandocHeader = comm2 "providecommand" (comm0 "tightlist") $ do
-  comm2 "setlength" (commS "itemsep") "0pt"
-  comm2 "setlength" (commS "parskip") "0pt"
+pandocHeader = do
+  comm2 "providecommand" (comm0 "tightlist") $ do
+    comm2 "setlength" (commS "itemsep") "0pt"
+    comm2 "setlength" (commS "parskip") "0pt"
 
 mkSocial :: Text -> Social -> LaTeXReader ()
 mkSocial service Social {..} = optFixComm "social" 1 [raw service, raw user]
