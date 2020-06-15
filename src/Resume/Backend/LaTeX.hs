@@ -19,6 +19,7 @@ import Text.LaTeX.Packages.Geometry
 import Text.LaTeX.Packages.Inputenc
 import Text.Pandoc (Pandoc, PandocError)
 import qualified Text.Pandoc as P
+import Text.Printf
 
 data LaTeXOptions
   = LaTeXOptions
@@ -146,7 +147,7 @@ mkDateRange startDate =
   maybe (mkDate startDate) (\d -> mkDate startDate <> "--" <> mkDate d)
 
 mkDate :: LaTeXC l => Date -> l
-mkDate Date {..} = fromString $ show month ++ "/" ++ show year
+mkDate Date {..} = fromString $ printf "%02d/%02d" month (year `mod` 100)
 
 mkSkill :: Skill Text -> LaTeXReader ()
 mkSkill Skill {..} = case skillSummary of
