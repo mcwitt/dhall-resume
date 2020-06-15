@@ -74,6 +74,10 @@ resume Resume {..} = do
     Region region -> comm1 "address" (raw region)
   foldMap (\t -> optFixComm "phone" 1 ["mobile", raw t]) (phone basics)
   document $ do
+    comm2 "renewcommand" (commS "namefont") $ do
+      comm2 "fontsize" 30 32
+      commS "mdseries"
+      commS "upshape"
     comm0 "makecvtitle"
     mapM_ mkSection sections
 
