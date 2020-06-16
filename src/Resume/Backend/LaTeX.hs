@@ -1,5 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Resume.Backend.LaTeX
@@ -20,6 +21,7 @@ import Text.LaTeX.Packages.Inputenc
 import Text.Pandoc (Pandoc, PandocError)
 import qualified Text.Pandoc as P
 import Text.Printf
+import Text.RawString.QQ
 
 data LaTeXOptions
   = LaTeXOptions
@@ -74,13 +76,29 @@ resume Resume {..} = do
         (raw $ fromMaybe "" country)
     Region region -> comm1 "address" (raw region)
   foldMap (\t -> optFixComm "phone" 1 ["mobile", raw t]) (phone basics)
+  tweakSpacing
   document $ do
     comm2 "renewcommand" (commS "namefont") $ do
-      comm2 "fontsize" 30 32
+      comm2 "fontsize" 24 28
       commS "mdseries"
       commS "upshape"
     comm0 "makecvtitle"
+    vspace $ Cm (-1.5)
     mapM_ mkSection sections
+
+-- | Fix extra space before section when using 'classic' template.
+-- See https://tex.stackexchange.com/questions/159810/moderncv-extra-vertical-space-after-cvitem
+tweakSpacing :: LaTeXC l => l
+tweakSpacing =
+  raw
+    [r|
+\makeatletter
+\@ifpackageloaded{moderncvstyleclassic}{%
+\let\oldsection\section%
+\renewcommand{\section}[1]{\leavevmode\unskip\vspace*{-\baselineskip}\oldsection{#1}}%
+}{%
+}
+\makeatother|]
 
 pandocHeader :: LaTeXReader ()
 pandocHeader = do
@@ -151,7 +169,7 @@ mkDate Date {..} = fromString $ printf "%02d/%02d" month (year `mod` 100)
 
 mkSkill :: Skill Text -> LaTeXReader ()
 mkSkill Skill {..} = case skillSummary of
-  Just summary -> comm2 "cvitem" (raw skillArea) (raw summary)
+  Just summary -> optFixComm "cvitem" 1 ["-0.5em", raw skillArea, raw summary]
   Nothing ->
     error
       "Rendering skill keyword lists is not yet implemented. Please use 'skillSummary' instead."
