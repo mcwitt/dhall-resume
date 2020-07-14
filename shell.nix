@@ -4,6 +4,7 @@ in hsPkgs.shellFor {
   withHoogle = true;
   tools = {
     cabal = "3.2.0.0";
+    cabal-bounds = "2.3.0";
     ghcide = "0.2.0";
     hlint = "3.1.6";
     ormolu = "0.1.2.0";
