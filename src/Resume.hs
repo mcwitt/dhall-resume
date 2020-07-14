@@ -39,7 +39,7 @@ readResume settings path = do
   text <- parseResume settings raw
   case toPandoc text of
     Right res -> return res
-    Left err -> fail $ "Error parsing Pandoc Markdown: " ++ show err
+    Left err -> fail $ "Error parsing Pandoc Markdown: " <> show err
 
 -- | Generate resume from dhall file using the specified backend
 compile :: Backend -> FilePath -> IO Text
